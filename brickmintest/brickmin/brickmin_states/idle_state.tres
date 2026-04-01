@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="IdleState" load_steps=2 format=3 uid="uid://dnvxp2aajbope"]
+
+[ext_resource type="Script" uid="uid://d3xdn5h6ecwsj" path="res://brickmin/brickmin_states/idle_state.gd" id="1_p22et"]
+
+[resource]
+script = ExtResource("1_p22et")
+metadata/_custom_type_script = "uid://d3xdn5h6ecwsj"

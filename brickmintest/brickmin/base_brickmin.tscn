@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://duj5avowl58wi"]
+
+[ext_resource type="Script" uid="uid://b8dt88qtengtn" path="res://brickmin/base_brickmin.gd" id="1_uk1wq"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_rbdsm"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_g2ej3"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_uk1wq"]
+no_depth_test = true
+
+[sub_resource type="SphereMesh" id="SphereMesh_uk1wq"]
+material = SubResource("StandardMaterial3D_uk1wq")
+
+[node name="CharacterBody3D" type="CharacterBody3D" unique_id=765707226 groups=["brickmin"]]
+collision_layer = 4
+safe_margin = 0.01
+script = ExtResource("1_uk1wq")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=31465842]
+shape = SubResource("CapsuleShape3D_rbdsm")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1436396171]
+layers = 2
+mesh = SubResource("CapsuleMesh_g2ej3")
+skeleton = NodePath("../CollisionShape3D")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=823581347]
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="." unique_id=1151145702]
+top_level = true
+visible = false
+mesh = SubResource("SphereMesh_uk1wq")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="." unique_id=1342179466]
+visible = false
+mesh = SubResource("SphereMesh_uk1wq")

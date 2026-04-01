@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="ThrowState" load_steps=2 format=3 uid="uid://b0gtwss15ksx6"]
+
+[ext_resource type="Script" uid="uid://2hrbs35lkcu7" path="res://brickmin/brickmin_states/throw_state.gd" id="1_ij1us"]
+
+[resource]
+script = ExtResource("1_ij1us")
+metadata/_custom_type_script = "uid://2hrbs35lkcu7"

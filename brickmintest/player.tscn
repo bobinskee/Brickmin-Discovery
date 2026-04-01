@@ -1,0 +1,118 @@
+[gd_scene format=3 uid="uid://cvenwqpj4sdeo"]
+
+[ext_resource type="Script" uid="uid://dn86cgqiwe6r5" path="res://player_body.gd" id="2_dw050"]
+[ext_resource type="Script" uid="uid://d1w53j3pro57m" path="res://cursor/cursor.gd" id="3_hqtel"]
+[ext_resource type="Script" uid="uid://dvf3whhcan7l" path="res://cursor/gimbal.gd" id="3_sweqy"]
+[ext_resource type="Script" uid="uid://btde2ji4sji2" path="res://cursor/call_dot.gd" id="4_1jxqw"]
+[ext_resource type="Script" uid="uid://bvs5htry233u6" path="res://cursor/cursor_line.gd" id="5_sweqy"]
+[ext_resource type="Texture2D" uid="uid://c8osyow87bl63" path="res://cursor/textures/kot_cursor2.png" id="6_1jxqw"]
+[ext_resource type="Script" uid="uid://dyk16kt15ynqd" path="res://general.gd" id="6_2hs0m"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_h2yge"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_1bvp3"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0xm2m"]
+albedo_color = Color(0.21960784, 0.8039216, 1, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_2hs0m"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1jxqw"]
+render_priority = 1
+transparency = 1
+no_depth_test = true
+shading_mode = 0
+albedo_color = Color(0.21960784, 0.8039216, 1, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_1jxqw"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dw050"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.21960784, 0.8039216, 1, 0.31764707)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_b26j0"]
+no_depth_test = true
+
+[sub_resource type="SphereMesh" id="SphereMesh_dw050"]
+material = SubResource("StandardMaterial3D_b26j0")
+
+[node name="Player" type="Node3D" unique_id=1848094488 groups=["leaders"]]
+
+[node name="Body" type="Node3D" parent="." unique_id=51513716]
+
+[node name="CharacterBody3D" type="CharacterBody3D" parent="Body" unique_id=414084440]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+collision_layer = 2
+collision_mask = 11
+script = ExtResource("2_dw050")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Body/CharacterBody3D" unique_id=330082477]
+shape = SubResource("CapsuleShape3D_h2yge")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Body/CharacterBody3D" unique_id=749446124]
+layers = 2
+mesh = SubResource("CapsuleMesh_1bvp3")
+surface_material_override/0 = SubResource("StandardMaterial3D_0xm2m")
+
+[node name="PlayerCamera" type="Node3D" parent="Body/CharacterBody3D" unique_id=75387531]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 0.9999998, 0, 0, 0, 0.9999998, 0, 0, 0)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="Body/CharacterBody3D/PlayerCamera" unique_id=1139876794]
+transform = Transform3D(1, 0, 0, 0, 0.9999999, 0, 0, 0, 0.9999999, 0, 0, 0)
+spring_length = 20.0
+script = ExtResource("3_sweqy")
+sensitivity = 0.05
+
+[node name="Camera3D" type="Camera3D" parent="Body/CharacterBody3D/PlayerCamera/SpringArm3D" unique_id=368595441]
+
+[node name="Cursor" type="Node3D" parent="." unique_id=1895479891]
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
+script = ExtResource("3_hqtel")
+
+[node name="Pointer" type="Node3D" parent="Cursor" unique_id=650296362]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+top_level = true
+
+[node name="PointerMesh" type="MeshInstance3D" parent="Cursor/Pointer" unique_id=352390532]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)
+layers = 2
+mesh = SubResource("SphereMesh_2hs0m")
+surface_material_override/0 = SubResource("StandardMaterial3D_1jxqw")
+
+[node name="CallDot" type="Node3D" parent="Cursor/Pointer" unique_id=1495129225]
+physics_interpolation_mode = 1
+script = ExtResource("4_1jxqw")
+
+[node name="CallDotMesh" type="MeshInstance3D" parent="Cursor/Pointer/CallDot" unique_id=1769789398]
+physics_interpolation_mode = 1
+transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)
+layers = 2
+mesh = SubResource("SphereMesh_1jxqw")
+skeleton = NodePath("../../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_dw050")
+
+[node name="CursorLine" type="Node3D" parent="Cursor" unique_id=1244025496]
+physics_interpolation_mode = 2
+script = ExtResource("5_sweqy")
+
+[node name="LandVis" type="Node3D" parent="Cursor" unique_id=658244517]
+
+[node name="CursorDecal" type="Decal" parent="Cursor/LandVis" unique_id=914744907]
+physics_interpolation_mode = 2
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0, 0)
+size = Vector3(1, 0.81152344, 1)
+texture_albedo = ExtResource("6_1jxqw")
+emission_energy = 16.0
+modulate = Color(0.21960784, 0.8039216, 1, 1)
+upper_fade = 7.661952e-05
+lower_fade = 2.3582428e-05
+distance_fade_length = 200.0
+cull_mask = 1048573
+
+[node name="General" type="Node" parent="." unique_id=648599880]
+script = ExtResource("6_2hs0m")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=269134257]
+mesh = SubResource("SphereMesh_dw050")
