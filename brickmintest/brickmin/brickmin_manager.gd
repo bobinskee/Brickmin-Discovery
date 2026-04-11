@@ -193,9 +193,9 @@ func _physics_process(delta: float) -> void:
 								1: 
 									ledge_norms[k] = normalray_result["normal"]
 				
-				if i.wanna_jump and i.leader and i.leader.new_jump_pos:
+				if i.wanna_jump and i.leader and i.leader.jump_to:
 					
-					var jump_dist = (i.leader.new_jump_pos - i.global_position)
+					var jump_dist = (i.leader.jump_to - i.global_position)
 					var max_jump = 15
 					
 					jump_dist.y = 0.0
@@ -205,7 +205,7 @@ func _physics_process(delta: float) -> void:
 					
 					var start = i.global_position + (jump_dist) + high
 					var end = i.global_position + (jump_dist)
-					end.y = i.leader.new_jump_pos.y
+					end.y = i.leader.jump_to.y - 5
 					
 					var jumpray = PhysicsRayQueryParameters3D.create(start, end, 1)
 					jumpray.exclude = [i.get_rid()]

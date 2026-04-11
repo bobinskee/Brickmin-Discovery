@@ -166,7 +166,7 @@ func _update_min(brickmin: CharacterBody3D, delta: float, dict_individual: Dicti
 							
 							var offset_amt = 1.5
 							
-							if brickmin.leader.should_jump and not dict_individual["walk_off"]:
+							if brickmin.leader.is_on_floor() and not dict_individual["walk_off"]:
 								
 								var rand_offset = Vector3(randf_range(-offset_amt, offset_amt), 0.0, randf_range(-offset_amt, offset_amt))
 								var base_jump_height = 10
