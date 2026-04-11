@@ -206,6 +206,6 @@ func _physics_process(delta: float) -> void:
 	jump_to = jump_to - bottom + (safe_direction.normalized() * 5)
 	#endregion
 	
-	testmesh.global_position = jump_to #Debug thing for visualing jump_to.
+	testmesh.global_position = jump_to #Debug thing for visualizing jump_to.
 	
 	move_and_slide() #Need this at end to actually move.
