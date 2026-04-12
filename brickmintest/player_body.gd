@@ -1,8 +1,13 @@
 extends CharacterBody3D
+## 4/11/26
+## This script lets the player move around, jump, and also feeds the jump_to
+## position to the Brickmin manager for Brickmin gap jumping.
 
 #region Variable dump
 @onready var gimbal: SpringArm3D = $PlayerCamera/SpringArm3D #Gimbal that controls the camera.
 @onready var testmesh = $"../../MeshInstance3D"
+@onready var input_handler = $"../../InputHandler"
+
 @export var speed: float = 15.0 #Player movement speed.
 @export var acceleration: float = 300.0 #How fast player reaches max speed.
 @export var jump_power: float = 4.0 #How high player can jump.
@@ -10,17 +15,16 @@ extends CharacterBody3D
 
 var y_velocity: float = 0.0 #Previous player y velocity.
 var jump_buffer: float = 0.0 #Doesn't do anything just yet...
-
-var jumping: bool = false #Jumping or not.
-var jump_initiated: bool = false #Started the jump.
 var can_bufferjump: bool = false #Able to jump.
+
+var has_jumped: bool = false #Whether the player jumped or not.
+
 var swarming: bool = false #Player is holding E to swarm.
+
 var jump_to: Vector3 = Vector3.ZERO #New position for Brickmin to jump to found.
 var should_jump: bool = false #The Brickmin want to actually jump to the jump position found.
 var shrink_offset: bool = false #Whether the amount of randomization in the Brickmin landing position is shrunk or not (makes where Brickmin jump more precise).
-var has_jumped: bool = false #Whether the player jumped or not.
 
-var input_direction: Vector2 = Vector2(0.0, 0.0) #Direction of input.
 var player_direction: Vector3 = Vector3(0.0, 0.0, 0.0) #Player's current direction.
 #endregion
 
@@ -29,28 +33,14 @@ func _ready() -> void:
 	
 	jump_buffer = jump_buffer_timing #Set the jump buffer to the jump buffer's timing.
 	
-func _input(_event: InputEvent) -> void:
-	## Inputs for moving, jumping, and swarming.
-	
-	#Gets a direction for input from four 2D directions.
-	input_direction = Input.get_vector("move_left", "move_right", "move_up", "move_down") 
-	
-	#Everything else here self-explanatory blablablebleblublu
-	if Input.is_action_just_pressed("jump"):
-		jumping = true
-		
-	if Input.is_action_pressed("swarm"):
-		swarming = true
-	else:
-		swarming = false
-	
 func _physics_process(delta: float) -> void:
 	## Makes player move based on camera position, 
 	## sets stuff with gravity and velocity,
 	## handles jumping and bufferjumping,
 	## and handles the jump_to position, which gets fed to the Brickmin manager.
 	
-	var space_state = get_viewport().find_world_3d().direct_space_state #We need this for raycasts (my beloved).
+	#We need this for raycasts (my beloved).
+	var space_state = get_viewport().find_world_3d().direct_space_state 
 	
 	#region Moving the player based on the camera.
 	## Games always feel more natural when they control based on the camera's orientation.
@@ -71,10 +61,13 @@ func _physics_process(delta: float) -> void:
 	right = right.normalized()
 	
 	#Move the player left, right, forwards, or backwards. How it works:
-	#1: The right pertains to the x-axis, and forward to the z-axis.
-	#2: For the axis, it is multiplied by either 0 (no input), 1 (in that direction), or -1 (opposite or that direction).
-	#3: right * 1 (D press) = moving right, forward * -1 (S press) = moving backwards
-	player_direction = (right * input_direction.x) + (forward * input_direction.y)
+	#1: Make sure input handler is loaded. We need this for inputs.
+	#2: The right pertains to the x-axis, and forward to the z-axis.
+	#3: For the axis, it is multiplied by either 0 (no input), 1 (in that direction), or -1 (opposite or that direction).
+	#4: right * 1 (D press) = moving right, forward * -1 (S press) = moving backwards
+	#if input_handler.input_direction:
+	var input_2D = input_handler.input_direction
+	player_direction = (right * input_2D.x) + (forward * input_2D.y)
 	
 	player_direction.y = 0.0 #Remove the y-axis from the direction.
 	player_direction = player_direction.normalized() #Normalize the final direction.
@@ -120,14 +113,14 @@ func _physics_process(delta: float) -> void:
 	else:
 		can_bufferjump = false #Cannot bufferjump.
 	
-	if jumping: #If jump button pressed...
+	if input_handler.player_jump: #If jump button pressed...
 		if can_bufferjump: 
 			self.velocity.y = 0 #Cancel out any negative y-velocity from the gravity.
 		
 		if is_on_floor() or can_bufferjump: #Jump if either conditions are met.
 			self.velocity.y += (jump_power * General.jump_power_mult) #Normal jump.
 	
-	jumping = false #Reset jumping to false 
+	input_handler.player_jump = false #Reset jumping to false 
 	#endregion 
 	
 	#region Position for Brickmin to jump to when gap jumping.
@@ -187,6 +180,7 @@ func _physics_process(delta: float) -> void:
 					#Add this new ledge normal to the ledge_norm variable
 					#Adding allows for smoothing between detected angles.
 					ledge_norm += nearledge_result["normal"] 
+		
 		else: #No ledge found.
 			ledge_norm = Vector3.ZERO #No more ledge normal.
 		

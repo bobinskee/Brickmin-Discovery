@@ -2,6 +2,7 @@ extends BrickminState
 class_name ThrowState
  
 func _update_min(brickmin: CharacterBody3D, delta: float, _dict_individual: Dictionary, _dict_all: Dictionary):
+	##CONSOLIDATE THIS WITH GAPJUMP STATE
 	
 	var last_pos = brickmin.global_position
 	

@@ -7,6 +7,8 @@
 [ext_resource type="Script" uid="uid://bvs5htry233u6" path="res://cursor/cursor_line.gd" id="5_sweqy"]
 [ext_resource type="Texture2D" uid="uid://c8osyow87bl63" path="res://cursor/textures/kot_cursor2.png" id="6_1jxqw"]
 [ext_resource type="Script" uid="uid://dyk16kt15ynqd" path="res://general.gd" id="6_2hs0m"]
+[ext_resource type="Script" uid="uid://c6ll1bnvw6rpr" path="res://input_handler.gd" id="8_dw050"]
+[ext_resource type="Script" uid="uid://bxvdv7unl4ylt" path="res://squad_handler.gd" id="9_b26j0"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_h2yge"]
 
@@ -115,4 +117,11 @@ cull_mask = 1048573
 script = ExtResource("6_2hs0m")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=269134257]
+visible = false
 mesh = SubResource("SphereMesh_dw050")
+
+[node name="InputHandler" type="Node" parent="." unique_id=701630332]
+script = ExtResource("8_dw050")
+
+[node name="SquadHandler" type="Node" parent="." unique_id=2033953433]
+script = ExtResource("9_b26j0")

@@ -35,7 +35,8 @@ func _physics_process(delta: float) -> void:
 		for i in any_called:
 			var who_was_called = i["collider"]
 			if who_was_called.is_in_group("brickmin"):
-				who_was_called.leader = $"../../../Body/CharacterBody3D"
+				#who_was_called.leader = $"../../../Body/CharacterBody3D"
+				who_was_called.leader = $"../../.."
 				who_was_called.state = load("res://brickmin/brickmin_states/follow_state.tres")
 				who_was_called.t = 0.0
 				who_was_called.being_called = true

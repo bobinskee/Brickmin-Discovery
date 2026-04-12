@@ -7,13 +7,18 @@ var count: int = 0
 var total_min = []
 var leader_bodies = []
 
+signal total_min_update
+
 func _spawn_min(_player, spawn_pos: Vector3, scene: Node):
+	
+	total_min_update.emit()
 	
 	count += 1
 	
 	if leaders and not leader_bodies:
 		for i in leaders:
-			var player_body = (i.get_child(0).get_child(0))
+			#var player_body = (i.get_child(0).get_child(0))
+			var player_body = i.get_node(^"Body").get_node(^"CharacterBody3D")
 			leader_bodies.append(player_body)
 	
 	if count <= 100:
@@ -29,6 +34,8 @@ func _spawn_min(_player, spawn_pos: Vector3, scene: Node):
 			new_min.name = ("min " + str(count))
 			new_min.id = total_min.size()
 			new_min.state = load("res://brickmin/brickmin_states/idle_state.tres")
+		
+		
 
 func _physics_process(delta: float) -> void:
 	var all_min = get_tree().get_nodes_in_group("brickmin")
@@ -55,30 +62,32 @@ func _physics_process(delta: float) -> void:
 		var targ_velo = Vector3.ZERO
 		var jump_to = Vector3.ZERO
 		
-		if i.state is FollowState or i.state is IdleState:
+		if i.state is FollowState:
 			
 			var space_state = get_viewport().find_world_3d().direct_space_state
-			
 			var cur_velo_length = clamp(i.velocity.length(), 0, i.speed)
 			
 			if i.leader:
 				
-				var cursor = i.leader.get_parent().get_parent().get_child(1)
+				var player_obj = i.leader
+				var cursor = player_obj.get_node(^"Cursor")
+				var swarming = player_obj.get_node(^"InputHandler").player_swarming
+				var leader_body = player_obj.get_node(^"Body").get_node(^"CharacterBody3D")
 				
-				if abs(i.leader.velocity.x) > 0 or abs(i.leader.velocity.z) > 0 or i.being_called:
+				if abs(leader_body.velocity.length()) > 0 or i.being_called:
 					cur_velo_length = clamp(i.velocity.length(), 1, i.speed)
 					i.being_called = false
 					
-				var target = i.leader.global_position
-					
-				if i.leader.swarming:
-					if cursor.where_pointer:
-						target = cursor.where_pointer
+				var target = leader_body.global_position
+				
+				if swarming:
+					if cursor.get_node(^"Pointer"):
+						target = cursor.get_node(^"Pointer").global_position
 					
 					else:
 						target = cursor.global_position
 				
-				if abs(i.global_position.y - target.y) < 1.1 and not i.leader.swarming:
+				if abs(leader_body.global_position.y - target.y) < 1.1 and not swarming:
 					
 					var dir_to_targ = (target - i.global_position)
 					dir_to_targ.y = 0.0
@@ -121,81 +130,77 @@ func _physics_process(delta: float) -> void:
 							path = pf_result.get_path()
 				
 				targ_velo = i.global_position.direction_to(target)
-			
-			targ_velo.y = 0.0
-			
-			var wallcheck = PhysicsRayQueryParameters3D.create(i.global_position, i.global_position + targ_velo * cur_velo_length, 1)
-			wallcheck.exclude = [i.get_rid()]
-			var wallcheck_result = space_state.intersect_ray(wallcheck)
-			
-			if wallcheck_result:
+				targ_velo.y = 0.0
 				
-				var above_pos = Vector3(0.0, 3.0, 0.0) + (Vector3(targ_velo.x, 0.0, targ_velo.z) * 10)
+				var wallcheck = PhysicsRayQueryParameters3D.create(i.global_position, i.global_position + targ_velo * cur_velo_length, 1)
+				wallcheck.exclude = [i.get_rid()]
+				var wallcheck_result = space_state.intersect_ray(wallcheck)
 				
-				var ledgecheck = PhysicsRayQueryParameters3D.create(i.global_position + above_pos, i.global_position + targ_velo, 1)
-				ledgecheck.exclude = [i.get_rid()]
-				var ledgecheck_result = space_state.intersect_ray(ledgecheck)
+				if wallcheck_result:
+					
+					var above_pos = Vector3(0.0, 3.0, 0.0) + (Vector3(targ_velo.x, 0.0, targ_velo.z) * 10)
+					
+					var ledgecheck = PhysicsRayQueryParameters3D.create(i.global_position + above_pos, i.global_position + targ_velo, 1)
+					ledgecheck.exclude = [i.get_rid()]
+					var ledgecheck_result = space_state.intersect_ray(ledgecheck)
+					
+					if ledgecheck_result:
+						if ledgecheck_result["normal"].y != 0:
+							hop_to_position = ledgecheck_result["position"]
 				
-				if ledgecheck_result:
-					if ledgecheck_result["normal"].y != 0:
-						hop_to_position = ledgecheck_result["position"]
-			
-			var cur_vel = i.comb_force
-			cur_vel.y = 0.0
-			
-			var xz_cur_vel = Vector3(cur_vel.x, 0.0, cur_vel.z)
-			xz_cur_vel = xz_cur_vel
-			
-			var right_vel = xz_cur_vel.cross(Vector3.UP)
-			right_vel = Vector3(right_vel.x, 0.0, right_vel.z)
-			
-			var length: float = 2
-			
-			var offsets = [
-				(xz_cur_vel.normalized() * length) - (right_vel.normalized() * length/2), #center-left
-				(xz_cur_vel.normalized() * length) + (right_vel.normalized() * length/2), #center-right
-			]
-			
-			var bottom = Vector3(0.0, -i.get_child(1).mesh.height/2 - 0.1, 0.0)
-			var end_pos = i.global_position + bottom
-			
-			var high = Vector3(0.0, 5.0, 0.0)
-			
-			if i.is_on_floor():
+				var cur_vel = i.comb_force
+				cur_vel.y = 0.0
 				
-				var in_front = i.global_position
-				var start_pos = i.global_position
+				var xz_cur_vel = Vector3(cur_vel.x, 0.0, cur_vel.z)
+				xz_cur_vel = xz_cur_vel
 				
-				for k in range(offsets.size()):
+				var right_vel = xz_cur_vel.cross(Vector3.UP)
+				right_vel = Vector3(right_vel.x, 0.0, right_vel.z)
+				
+				var length: float = 2
+				
+				var offsets = [
+					(xz_cur_vel.normalized() * length) - (right_vel.normalized() * length/2), #center-left
+					(xz_cur_vel.normalized() * length) + (right_vel.normalized() * length/2), #center-right
+				]
+				
+				var bottom = Vector3(0.0, -i.get_child(1).mesh.height/2 - 0.1, 0.0)
+				var end_pos = i.global_position + bottom
+				
+				var high = Vector3(0.0, 5.0, 0.0)
+				
+				if i.is_on_floor():
 					
-					var cur_offset = offsets[k]
-					in_front = i.global_position + cur_offset
-					start_pos = i.global_position + bottom + cur_offset
+					var in_front = i.global_position
+					var start_pos = i.global_position
 					
-					var groundcheck = PhysicsRayQueryParameters3D.create(in_front + (Vector3.UP * 1), in_front + (Vector3.DOWN * 5), 1)
-					groundcheck.exclude = [i.get_rid()]
-					
-					var groundcheck_result = space_state.intersect_ray(groundcheck)
-					
-					var normalray = PhysicsRayQueryParameters3D.create(start_pos, end_pos, 1)
-					normalray.exclude = [i.get_rid()]
-					
-					var normalray_result = space_state.intersect_ray(normalray)
-					
-					if not groundcheck_result:
-						near_cliff = true
+					for k in range(offsets.size()):
 						
-						if normalray_result:
-							match int(k):
-								0: 
-									ledge_norms[k] = normalray_result["normal"]
-									
-								1: 
-									ledge_norms[k] = normalray_result["normal"]
+						var cur_offset = offsets[k]
+						in_front = i.global_position + cur_offset
+						start_pos = i.global_position + bottom + cur_offset
+						
+						var groundcheck = PhysicsRayQueryParameters3D.create(in_front + (Vector3.UP * 1), in_front + (Vector3.DOWN * 5), 1)
+						groundcheck.exclude = [i.get_rid()]
+						var groundcheck_result = space_state.intersect_ray(groundcheck)
+						
+						var normalray = PhysicsRayQueryParameters3D.create(start_pos, end_pos, 1)
+						normalray.exclude = [i.get_rid()]
+						var normalray_result = space_state.intersect_ray(normalray)
+						
+						if not groundcheck_result:
+							near_cliff = true
+							
+							if normalray_result:
+								match int(k):
+									0: 
+										ledge_norms[k] = normalray_result["normal"]
+									1: 
+										ledge_norms[k] = normalray_result["normal"]
 				
-				if i.wanna_jump and i.leader and i.leader.jump_to:
+				if i.wanna_jump:# and i.leader and leader_body.jump_to:
 					
-					var jump_dist = (i.leader.jump_to - i.global_position)
+					var jump_dist = (leader_body.jump_to - i.global_position)
 					var max_jump = 15
 					
 					jump_dist.y = 0.0
@@ -205,35 +210,33 @@ func _physics_process(delta: float) -> void:
 					
 					var start = i.global_position + (jump_dist) + high
 					var end = i.global_position + (jump_dist)
-					end.y = i.leader.jump_to.y - 5
+					end.y = leader_body.jump_to.y - 5
 					
 					var jumpray = PhysicsRayQueryParameters3D.create(start, end, 1)
 					jumpray.exclude = [i.get_rid()]
 					var jumpray_result = space_state.intersect_ray(jumpray)
-					#---
 					
 					var length2 = length
 					
 					if i.velocity == Vector3.ZERO:
 						length2 = 10
 					
-					var to_player = i.global_position.direction_to(i.leader.global_position) * (length2 + 0.5)
+					var to_player = i.global_position.direction_to(leader_body.global_position) * (length2 + 0.5)
 					var high2 = Vector3(to_player.x, 0.0, to_player.z)
 					var low2 = Vector3(to_player.x, -i.get_child(1).mesh.height/2 - 0.1, to_player.z)
 					
 					var groundcheck2 = PhysicsRayQueryParameters3D.create(i.global_position + high2, i.global_position + low2, 1)
 					groundcheck2.exclude = [i.get_rid()]
 					var groundcheck_result2 = space_state.intersect_ray(groundcheck2)
-					#---
 					
 					if not groundcheck_result2 and jumpray_result:
 						jump_to = jumpray_result["position"]
 						#i.get_child(3).global_position = jumpray_result["position"]
 					
 					if jump_to.y:
-						if jump_to.y > i.leader.global_position.y:
+						if jump_to.y > leader_body.global_position.y:
 							walk_off = true
-					
+		
 		var dict_individual = {
 			"hop_to": hop_to_position,
 			"near_cliff": near_cliff,

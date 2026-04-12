@@ -59,6 +59,8 @@ func _update_min(brickmin: CharacterBody3D, delta: float, dict_individual: Dicti
 			elif new_norms.size() > 1:
 				cur_move = Vector3.ZERO
 	
+	brickmin.reaction_time = 1 + randf_range(0, 0.3)
+	
 	if brickmin.velocity.is_finite():
 		
 		brickmin.velocity = cur_move

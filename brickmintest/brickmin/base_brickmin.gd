@@ -30,6 +30,8 @@ var xz_rand = (randf_range(0, 5))
 var near_cliff: bool = false
 var walk_off: bool = true
 
+var reaction_time = 1 + randf_range(0, 0.3)
+
 #stuff for gap jumping
 var comb_force: Vector3 = Vector3.ZERO
 var wanna_jump: bool = false
