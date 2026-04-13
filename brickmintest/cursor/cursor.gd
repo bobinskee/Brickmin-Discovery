@@ -7,7 +7,8 @@ extends Node3D
 ## are done in _physics_process, but the actual
 ## global_position setting is done in _process.
 
-#region Variable dump
+#region Variables
+
 @onready var pointer = $Pointer #The dot that follows the mouse.
 @onready var camera = $"../Body/CharacterBody3D/PlayerCamera/SpringArm3D/Camera3D" #Duh.
 @onready var player_body = $"../Body/CharacterBody3D" #Body of the player who the cursor belongs to.
@@ -15,6 +16,7 @@ extends Node3D
 @onready var decal = $LandVis/CursorDecal #The actual decal for the land visual.
 @onready var player = $".." #The player themself.
 @onready var input_handler = $"../InputHandler" #Get some inputs.
+@onready var testmesh = $"../MeshInstance3D"
 
 @export var max_range: float = 20.0 #How far the cursor can go.
 
@@ -59,6 +61,7 @@ func _physics_process(_delta: float) -> void:
 	## 3: Player-to-pointer; goes from the player to the raw pointer 
 	##    position to see if anything is between. If so, stamp the landing
 	##    visual there, instead.
+	## 4: Wall-finder; used to verify if the pointer is at a wall or not.
 	 
 	#Get the distance from the camera to the player.
 	var cam_player_dist = camera.global_position.distance_to(player_body.global_position)
@@ -98,6 +101,18 @@ func _physics_process(_delta: float) -> void:
 	ray_playertopointer.exclude = [player_body.get_rid()]
 	var rayhit_playertopointer = space_state.intersect_ray(ray_playertopointer)
 	
+	#A point that checks if the pointer is touching a wall.
+	var end_findwall = physics_pos_pointer + (dir_playertopointer * 1.5)
+		#testmesh.global_position = end_findwall
+	
+	#Raycast for finding if the pointer is at a wall. It checks the pointer
+	#position to in the direction of the pointer to the player, and looks for
+	#walls and such.
+	var ray_findwall = PhysicsRayQueryParameters3D.create(physics_pos_pointer, end_findwall, 1)
+	ray_findwall.exclude = [player_body.get_rid()]
+	ray_findwall.hit_from_inside = true #Needed for it to detect walls.
+	var rayhit_foundwall = space_state.intersect_ray(ray_findwall)
+	
 	#endregion
 	
 	#region Logic to decide what raycast data to use and what not.
@@ -120,18 +135,22 @@ func _physics_process(_delta: float) -> void:
 	#never exceeds its set range.
 	if dist_playertopointer > max_range:
 		too_far = true
-	
-	if rayhit_pointer and not too_far:
-		#Something has been hit, and the pointer is in bounds.
-		physics_pos_pointer = (rayhit_pointer["position"])
 		
+	#Something has been hit, and the pointer is in bounds.
+	if rayhit_pointer and not too_far:
+		#Set the physics position of the pointer to whatever position
+		#the hit was at.
+		physics_pos_pointer = (rayhit_pointer["position"])
+	
+	#Nothing has been hit, and the pointer is still in bounds.
 	elif not rayhit_pointer and not too_far:
-		#Nothing has been hit, and the pointer is still in bounds.
+		#The physics position of the pointer is at max.
 		physics_pos_pointer = max_vector
 	
+	#Cursor's out of bounds!
 	elif too_far:
-		#Cursor's out of bounds! Extend the pointer as far as we 
-		#allow it in the direction of the player to the pointer.
+		#Extend the pointer as far as we allow it in the 
+		#direction of the player to the pointer.
 		physics_pos_pointer = player_body.global_position + (player_body.global_position.direction_to(pointer_would_be_at) * max_range) 
 	
 	#endregion
@@ -141,17 +160,18 @@ func _physics_process(_delta: float) -> void:
 	## visual, actually. Though, it's just basic if-statements
 	## here.
 	
-	#If there's something between the player and pointer...
-	if rayhit_playertopointer: 
+	#If there's something between the player and pointer and the
+	#pointer is at a wall...
+	if rayhit_playertopointer and rayhit_foundwall:
+		 
 		#Rotate the land visual to match and move its physics position to where
 		#the hit occurred.
 		land_vis.rotation.x = rayhit_playertopointer["normal"].z * 90.0
 		land_vis.rotation.z = rayhit_playertopointer["normal"].x * 90.0
 		physics_pos_landvis = rayhit_playertopointer["position"]
 	
-	#But if there isn't anything between the player and pointer,
-	#and there's ground underneath...
-	elif rayhit_landvis and not rayhit_playertopointer:
+	#If the pointer isn't at a wall and there's ground underneath...
+	elif rayhit_landvis and not rayhit_foundwall:
 		#No land visual rotation, and again, set the physics position to hit
 		#location.
 		land_vis.rotation = Vector3.ZERO

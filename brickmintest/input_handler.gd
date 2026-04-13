@@ -1,7 +1,11 @@
 extends Node
+## 4/12/26
 ## Consolidates all player inputs into one place (organization, hooray!!!)
 ## and is used across other scripts in the player.
-## NOTE: "external" means that variable is shipped out to other scripts.
+## NOTE: "external" means that variable or signal is shipped out to other 
+## scripts.
+
+#region Variables
 
 #2D directional input (left, right, up, down).
 var input_direction: Vector2 = Vector2(0.0, 0.0) #external
@@ -18,6 +22,8 @@ var holding_RMB: bool = false
 #Signals for throwing and disbanding.
 signal player_throw #external
 signal player_disbanded #external
+
+#endregion
 
 func _input(event: InputEvent) -> void:
 	## Where the actual inputs are logged.

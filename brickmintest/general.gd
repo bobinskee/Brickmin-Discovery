@@ -1,7 +1,5 @@
 extends Node
 
-var aiming: bool = false
-
 var gravity: float = 50.0
 var jump_power_mult: float = 5.0
 

@@ -3,10 +3,11 @@ extends CharacterBody3D
 ## This script lets the player move around, jump, and also feeds the jump_to
 ## position to the Brickmin manager for Brickmin gap jumping.
 
-#region Variable dump
+#region Variables
+
 @onready var gimbal: SpringArm3D = $PlayerCamera/SpringArm3D #Gimbal that controls the camera.
 @onready var testmesh = $"../../MeshInstance3D"
-@onready var input_handler = $"../../InputHandler"
+@onready var input_handler = $"../../InputHandler" #Needed for inputs.
 
 @export var speed: float = 15.0 #Player movement speed.
 @export var acceleration: float = 300.0 #How fast player reaches max speed.
@@ -200,6 +201,6 @@ func _physics_process(delta: float) -> void:
 	jump_to = jump_to - bottom + (safe_direction.normalized() * 5)
 	#endregion
 	
-	testmesh.global_position = jump_to #Debug thing for visualizing jump_to.
+	#testmesh.global_position = jump_to #Debug thing for visualizing jump_to.
 	
 	move_and_slide() #Need this at end to actually move.

@@ -1,4 +1,5 @@
 extends Node
+## 4/12/26
 ## This script handles things relating to interacting with the squad,
 ## such as throwing and disbanding. 
 ## NOTE: Swarming is already handled in the input manager, as it's just
@@ -72,7 +73,7 @@ func _throw() -> void:
 		current.leader = null #remove their leader,
 		current.t = 0.0 #reset their bezier curve time,
 		current.start = cursor_line.start #assign their start,
-		current.mid = cursor_line.midway #middle,
+		current.mid = cursor_line.middle #middle,
 		current.end = cursor_line.end #and end,
 		
 		#and finally, set their state to the throw state.
