@@ -44,6 +44,7 @@ func _physics_process(delta: float) -> void:
 	else:
 		cur_radius = 0.01
 		
+		
 func _process(_delta: float) -> void:
 	pass
 	calldot_mesh.scale = Vector3.ONE * cur_radius

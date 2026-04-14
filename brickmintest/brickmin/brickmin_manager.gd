@@ -18,7 +18,7 @@ func _spawn_min(_player, spawn_pos: Vector3, scene: Node):
 	if leaders and not leader_bodies:
 		for i in leaders:
 			#var player_body = (i.get_child(0).get_child(0))
-			var player_body = i.get_node(^"Body").get_node(^"CharacterBody3D")
+			var player_body = i.get_node(^"Body&Camera").get_node(^"CharacterBody3D")
 			leader_bodies.append(player_body)
 	
 	if count <= 100:
@@ -72,7 +72,7 @@ func _physics_process(delta: float) -> void:
 				var player_obj = i.leader
 				var cursor = player_obj.get_node(^"Cursor")
 				var swarming = player_obj.get_node(^"InputHandler").player_swarming
-				var leader_body = player_obj.get_node(^"Body").get_node(^"CharacterBody3D")
+				var leader_body = player_obj.get_node(^"Body&Camera").get_node(^"CharacterBody3D")
 				
 				if abs(leader_body.velocity.length()) > 0 or i.being_called:
 					cur_velo_length = clamp(i.velocity.length(), 1, i.speed)

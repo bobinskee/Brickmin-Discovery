@@ -24,6 +24,10 @@ config/icon="res://icon.svg"
 General="*res://general.gd"
 BrickminManager="*res://brickmin/brickmin_manager.gd"
 
+[display]
+
+window/size/mode=2
+
 [global_group]
 
 leaders="For all players"

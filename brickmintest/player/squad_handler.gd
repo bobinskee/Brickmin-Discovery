@@ -8,7 +8,7 @@ extends Node
 #region Variables
 
 #Obvious stuff.
-@onready var player_body = self.get_parent().get_node(^"Body").get_node(^"CharacterBody3D").global_position
+@onready var player_body = self.get_parent().get_node(^"Body&Camera").get_node(^"CharacterBody3D").global_position
 @onready var input_handler = $"../InputHandler" 
 
 var all_min: Array = BrickminManager.total_min #Every Brickmin on the field.
@@ -19,6 +19,8 @@ var squad: Array = []
 
 #Where the start, middle, and end variables are gotten for entering throw state.
 var cursor_line:Node3D
+
+var delta_global: float = 0.0
 
 #endregion
 
@@ -71,13 +73,13 @@ func _throw() -> void:
 	if squad.size() > 0: 
 		var current = squad.pop_front() #get whatever one's up next,
 		current.leader = null #remove their leader,
+		
+		#set their state to the throw state,
+		current.state = load("res://brickmin/brickmin_states/throw_state.tres")
 		current.t = 0.0 #reset their bezier curve time,
 		current.start = cursor_line.start #assign their start,
 		current.mid = cursor_line.middle #middle,
-		current.end = cursor_line.end #and end,
-		
-		#and finally, set their state to the throw state.
-		current.state = load("res://brickmin/brickmin_states/throw_state.tres")
+		current.end = cursor_line.end #and end.
 
 #func _check_all_min() -> void:
 func _process(_delta: float) -> void:

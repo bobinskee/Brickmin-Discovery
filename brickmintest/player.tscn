@@ -1,14 +1,14 @@
 [gd_scene format=3 uid="uid://cvenwqpj4sdeo"]
 
-[ext_resource type="Script" uid="uid://cnn7uimbv4ysi" path="res://player_body.gd" id="2_dw050"]
+[ext_resource type="Script" uid="uid://cnn7uimbv4ysi" path="res://player/player_body.gd" id="2_dw050"]
 [ext_resource type="Script" uid="uid://d1w53j3pro57m" path="res://cursor/cursor.gd" id="3_hqtel"]
-[ext_resource type="Script" uid="uid://dvf3whhcan7l" path="res://cursor/gimbal.gd" id="3_sweqy"]
+[ext_resource type="Script" uid="uid://dvf3whhcan7l" path="res://player/camera_angle.gd" id="3_sweqy"]
 [ext_resource type="Script" uid="uid://btde2ji4sji2" path="res://cursor/call_dot.gd" id="4_1jxqw"]
 [ext_resource type="Script" uid="uid://bvs5htry233u6" path="res://cursor/cursor_line.gd" id="5_sweqy"]
 [ext_resource type="Texture2D" uid="uid://c8osyow87bl63" path="res://cursor/textures/kot_cursor2.png" id="6_1jxqw"]
 [ext_resource type="Script" uid="uid://dyk16kt15ynqd" path="res://general.gd" id="6_2hs0m"]
-[ext_resource type="Script" uid="uid://c6ll1bnvw6rpr" path="res://input_handler.gd" id="8_dw050"]
-[ext_resource type="Script" uid="uid://bxvdv7unl4ylt" path="res://squad_handler.gd" id="9_b26j0"]
+[ext_resource type="Script" uid="uid://c6ll1bnvw6rpr" path="res://player/input_handler.gd" id="8_dw050"]
+[ext_resource type="Script" uid="uid://bxvdv7unl4ylt" path="res://player/squad_handler.gd" id="9_b26j0"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_h2yge"]
 
@@ -41,33 +41,32 @@ material = SubResource("StandardMaterial3D_b26j0")
 
 [node name="Player" type="Node3D" unique_id=1848094488 groups=["leaders"]]
 
-[node name="Body" type="Node3D" parent="." unique_id=51513716]
+[node name="Body&Camera" type="Node3D" parent="." unique_id=51513716]
 
-[node name="CharacterBody3D" type="CharacterBody3D" parent="Body" unique_id=414084440]
+[node name="CharacterBody3D" type="CharacterBody3D" parent="Body&Camera" unique_id=414084440]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
 collision_layer = 2
 collision_mask = 11
 script = ExtResource("2_dw050")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Body/CharacterBody3D" unique_id=330082477]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Body&Camera/CharacterBody3D" unique_id=330082477]
 shape = SubResource("CapsuleShape3D_h2yge")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Body/CharacterBody3D" unique_id=749446124]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Body&Camera/CharacterBody3D" unique_id=749446124]
 layers = 2
 mesh = SubResource("CapsuleMesh_1bvp3")
 surface_material_override/0 = SubResource("StandardMaterial3D_0xm2m")
 
-[node name="PlayerCamera" type="Node3D" parent="Body/CharacterBody3D" unique_id=75387531]
-unique_name_in_owner = true
+[node name="PlayerCamera" type="Node3D" parent="Body&Camera/CharacterBody3D" unique_id=75387531]
 transform = Transform3D(1, 0, 0, 0, 0.9999998, 0, 0, 0, 0.9999998, 0, 0, 0)
 
-[node name="SpringArm3D" type="SpringArm3D" parent="Body/CharacterBody3D/PlayerCamera" unique_id=1139876794]
+[node name="SpringArm3D" type="SpringArm3D" parent="Body&Camera/CharacterBody3D/PlayerCamera" unique_id=1139876794]
 transform = Transform3D(1, 0, 0, 0, 0.9999999, 0, 0, 0, 0.9999999, 0, 0, 0)
 spring_length = 20.0
 script = ExtResource("3_sweqy")
 sensitivity = 0.05
 
-[node name="Camera3D" type="Camera3D" parent="Body/CharacterBody3D/PlayerCamera/SpringArm3D" unique_id=368595441]
+[node name="Camera3D" type="Camera3D" parent="Body&Camera/CharacterBody3D/PlayerCamera/SpringArm3D" unique_id=368595441]
 
 [node name="Cursor" type="Node3D" parent="." unique_id=1895479891]
 transform = Transform3D(3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0)

@@ -10,8 +10,8 @@ extends Node3D
 #region Variables
 
 @onready var pointer = $Pointer #The dot that follows the mouse.
-@onready var camera = $"../Body/CharacterBody3D/PlayerCamera/SpringArm3D/Camera3D" #Duh.
-@onready var player_body = $"../Body/CharacterBody3D" #Body of the player who the cursor belongs to.
+@onready var camera = $"../Body&Camera/CharacterBody3D/PlayerCamera/SpringArm3D/Camera3D" #Duh.
+@onready var player_body = $"../Body&Camera/CharacterBody3D" #Body of the player who the cursor belongs to.
 @onready var land_vis = $LandVis #The point projected to visualize the cursor's location in the world.
 @onready var decal = $LandVis/CursorDecal #The actual decal for the land visual.
 @onready var player = $".." #The player themself.

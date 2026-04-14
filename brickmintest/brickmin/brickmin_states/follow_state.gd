@@ -16,7 +16,7 @@ func _update_min(brickmin: CharacterBody3D, delta: float, dict_individual: Dicti
 	
 		var player_cursor = brickmin.leader.get_node(^"Cursor").get_node(^"Pointer")
 		var swarming = brickmin.leader.get_node(^"InputHandler").player_swarming
-		var leader_body = brickmin.leader.get_node(^"Body").get_node(^"CharacterBody3D")
+		var leader_body = brickmin.leader.get_node(^"Body&Camera").get_node(^"CharacterBody3D")
 		
 		if brickmin.velocity.is_finite():
 			

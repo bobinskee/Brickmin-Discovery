@@ -67,7 +67,7 @@ func _process(_delta: float) -> void:
 	
 	#Set the start and end positions (each frame) to the positions
 	#of the player body and pointer respectively.
-	start = $"../../Body/CharacterBody3D".global_position
+	start = $"../../Body&Camera/CharacterBody3D".global_position
 	end = $"../Pointer".position
 	
 	#Set the middle position.
