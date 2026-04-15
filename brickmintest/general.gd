@@ -13,3 +13,6 @@ func _bezcurve(time: float, start: Vector3, middle: Vector3, end: Vector3) -> Ve
 	var l1 = middle + (time * (end - middle))
 	
 	return l0 + (time * (l1 - l0))
+
+func _set_mask(layer: int) -> int:
+	return 1 << (layer - 1)

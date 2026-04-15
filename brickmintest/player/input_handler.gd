@@ -21,6 +21,7 @@ var snap_to: Vector2 = Vector2.ZERO
 
 #Specific self-explanatory player action booleans.
 var player_jump: bool = false #external
+var player_calling: bool = false #external
 var player_swarming: bool = false #external
 var player_aiming: bool = false #external
 var holding_RMB: bool = false
@@ -46,6 +47,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		player_swarming = true
 	else:
 		player_swarming = false
+	
+	if Input.is_key_pressed(KEY_F):
+		player_calling = true
+	else:
+		player_calling = false
 	
 	if event.is_action_released("throw"):
 		player_throw.emit()

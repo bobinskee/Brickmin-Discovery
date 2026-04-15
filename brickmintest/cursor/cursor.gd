@@ -1,11 +1,13 @@
 extends Node3D
 ## 4/12/26
 ## Handles the cursor, which is the little dot that follows
-## the mouse, and the landing visual, which is the little
+## the mouse, the landing visual, which is the little
 ## graphic that follows under the cursor or onto surfaces
-## that are being intersected. The logic and calculations
-## are done in _physics_process, but the actual
-## global_position setting is done in _process.
+## that are being intersected, and the calldot, which is 
+## what calls Brickmin into your squad.
+## The logic and calculations are done in _physics_process,
+## but the actual global_position and mesh transforming
+## is done in _process.
 
 #region Variables
 
@@ -17,8 +19,21 @@ extends Node3D
 @onready var player = $".." #The player themself.
 @onready var input_handler = $"../InputHandler" #Get some inputs.
 @onready var testmesh = $"../MeshInstance3D"
+@onready var calldot = $Pointer/CallDot/CallDotMesh
 
 @export var max_range: float = 20.0 #How far the cursor can go.
+@export var max_rad:float = 7.5 #How big the calldot can get.
+@export var grow_speed: float = 20.0 #How fast the calldot grows.
+
+#The shape the calldot hitball will use.
+var calldot_shape := SphereShape3D.new()
+
+#The actual calldot hitball. Used for calling Brickmin. 
+#(Literally a hitbox but a ball lol).
+var calldot_hitball := PhysicsShapeQueryParameters3D.new()
+
+#The current radius of the calldot shape.
+var curr_rad: float = 0.0
 
 #How far to look under the pointer for if there's ground.
 var look_down: Vector3 = Vector3.DOWN * 50 
@@ -41,11 +56,13 @@ var physics_pos_landvis: Vector3 = Vector3.ZERO
 
 func _input(_event: InputEvent) -> void:
 	#Only for testing.
+	#Will be deleted when done testing.
 	if Input.is_action_pressed("pressed_1"):
 		BrickminManager._spawn_min(player, pointer.global_position, get_tree().current_scene)
 	
-func _physics_process(_delta: float) -> void:
-	## Do 3 raycasts, then a bunch of if-statements.
+func _physics_process(delta: float) -> void:
+	## Do 3 raycasts, then a bunch of if-statements, and
+	## stuff for calling Brickmin.
 	## No actual object positions are set here since the
 	## objects are all just visualizers.
 	
@@ -184,6 +201,60 @@ func _physics_process(_delta: float) -> void:
 	
 	#endregion
 	
+	#region Calling Brickmin
+	
+	#If the player is calling...
+	if input_handler.player_calling:
+		
+		#Increase the current radius to the maximum radius size. Its
+		#growth speed is delta times the growth speed.
+		curr_rad = move_toward(curr_rad, max_rad, delta * grow_speed)
+		
+		#The radius of the calldot shape is set to the current radius.
+		calldot_shape.radius = curr_rad
+		
+		#The actual hitball has its shape, transform (positioning),
+		#and collision mask set.
+		#Had to make a custom function become I'm a lazy chud who
+		#doesn't feel like dealing with deciphering binary layer
+		#masks lol.
+		calldot_hitball.shape = calldot_shape
+		calldot_hitball.transform.origin = physics_pos_pointer
+		calldot_hitball.collision_mask = General._set_mask(3)
+		
+		#Check if anything collided with the hitball.
+		var called = get_world_3d().direct_space_state.intersect_shape(calldot_hitball)
+		
+		#For all the things that collided with the hitball...
+		for i in called:
+			
+			#Make a variable out of the current iteration.
+			var who_was_called = i["collider"]
+			
+			#If the current iteration is a Brickmin...
+			if who_was_called.is_in_group("brickmin"):
+				
+				#make the leader the player that called them,
+				who_was_called.leader = player 
+				
+				#put them into the follow state,
+				who_was_called.state = load("res://brickmin/brickmin_states/follow_state.tres")
+				
+				#zero their t (as a safety measure)
+				#(This is for when they're in throw state or
+				#gap jump state),
+				who_was_called.t = 0.0
+				
+				#and make their being_called variable true.
+				who_was_called.being_called = true
+	
+	#Otherwise, player isn't calling.
+	else:
+		#Keep the current radius at 0.
+		curr_rad = 0.0
+	
+	#endregion
+	
 func _process(_delta: float) -> void:
 	## This is for the visuals-side of the cursor.
 	## _process is dependent on your device framerate and not the 60fps
@@ -205,3 +276,8 @@ func _process(_delta: float) -> void:
 	#physics positions.
 	pointer.global_position = physics_pos_pointer
 	land_vis.global_position = physics_pos_landvis
+	
+	#Set the calldot mesh scale to whatever the current radius is.
+	#Vector3.ONE is just to make a Vector3 with all floats equal to
+	#the current radius.
+	calldot.scale = Vector3.ONE * curr_rad

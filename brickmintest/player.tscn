@@ -3,7 +3,6 @@
 [ext_resource type="Script" uid="uid://cnn7uimbv4ysi" path="res://player/player_body.gd" id="2_dw050"]
 [ext_resource type="Script" uid="uid://d1w53j3pro57m" path="res://cursor/cursor.gd" id="3_hqtel"]
 [ext_resource type="Script" uid="uid://dvf3whhcan7l" path="res://player/camera_angle.gd" id="3_sweqy"]
-[ext_resource type="Script" uid="uid://btde2ji4sji2" path="res://cursor/call_dot.gd" id="4_1jxqw"]
 [ext_resource type="Script" uid="uid://bvs5htry233u6" path="res://cursor/cursor_line.gd" id="5_sweqy"]
 [ext_resource type="Texture2D" uid="uid://c8osyow87bl63" path="res://cursor/textures/kot_cursor2.png" id="6_1jxqw"]
 [ext_resource type="Script" uid="uid://dyk16kt15ynqd" path="res://general.gd" id="6_2hs0m"]
@@ -25,6 +24,55 @@ transparency = 1
 no_depth_test = true
 shading_mode = 0
 albedo_color = Color(0.21960784, 0.8039216, 1, 1)
+
+[sub_resource type="GDScript" id="GDScript_dw050"]
+script/source = "extends Node3D
+\"\"\"
+@onready var player = $\"../../..\"
+@onready var pointer = $\"..\"
+@onready var calldot_mesh = $CallDotMesh
+@onready var input_handler = $\"../../../InputHandler\"
+
+var curr_rad: float = 0.01
+var max_rad:float = 10.0
+
+var calldot_shape := SphereShape3D.new()
+var calldot := PhysicsShapeQueryParameters3D.new()
+
+func _physics_process(delta: float) -> void:
+	
+	#region Calling Brickmin
+	
+	if input_handler.player_calling:
+		
+		curr_rad = move_toward(curr_rad, max_rad/pointer.scale.x, delta * 20)
+		
+		calldot_shape.radius = curr_rad
+		
+		calldot.shape = calldot_shape
+		calldot.transform.origin = pointer.global_position
+		calldot.collision_mask = General._set_mask(3)
+		
+		var any_called = get_world_3d().direct_space_state.intersect_shape(calldot)
+		
+		for i in any_called:
+			var who_was_called = i[\"collider\"]
+			if who_was_called.is_in_group(\"brickmin\"):
+				who_was_called.leader = $\"../../..\"
+				who_was_called.state = load(\"res://brickmin/brickmin_states/follow_state.tres\")
+				who_was_called.t = 0.0
+				who_was_called.being_called = true
+		
+	else:
+		curr_rad = 0.01
+	
+	#endregion
+	
+func _process(_delta: float) -> void:
+	#pass
+	calldot_mesh.scale = Vector3.ONE * curr_rad
+\"\"\"
+"
 
 [sub_resource type="SphereMesh" id="SphereMesh_1jxqw"]
 
@@ -84,7 +132,7 @@ surface_material_override/0 = SubResource("StandardMaterial3D_1jxqw")
 
 [node name="CallDot" type="Node3D" parent="Cursor/Pointer" unique_id=1495129225]
 physics_interpolation_mode = 1
-script = ExtResource("4_1jxqw")
+script = SubResource("GDScript_dw050")
 
 [node name="CallDotMesh" type="MeshInstance3D" parent="Cursor/Pointer/CallDot" unique_id=1769789398]
 physics_interpolation_mode = 1
