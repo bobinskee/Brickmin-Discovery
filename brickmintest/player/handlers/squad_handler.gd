@@ -4,6 +4,8 @@ extends Node
 ## such as throwing and disbanding. 
 ## NOTE: Swarming is already handled in the input manager, as it's just
 ## a boolean lol.
+## NOTE: Whistling is handled by cursor.gd. I feel like it made more
+## sense to just keep it there.
 
 #region Variables
 
@@ -71,8 +73,9 @@ func _throw() -> void:
 	
 	#If you have Brickmin in your squad...
 	if squad.size() > 0: 
-		var current = squad.pop_front() #get whatever one's up next,
+		var current = squad[squad.size() - 1] #get the last one in the squad,
 		current.leader = null #remove their leader,
+		squad.remove_at(squad.size() - 1) #remove them from the squad,
 		
 		#set their state to the throw state,
 		current.state = load("res://brickmin/brickmin_states/throw_state.tres")

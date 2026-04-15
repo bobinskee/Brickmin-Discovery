@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ixxevf3vh0r8"
-path="res://.godot/imported/circle_monochrome.png-1fa5ff8d8b9c643f99e59e506b2fad97.ctex"
+uid="uid://c27mvikj1sgcg"
+path="res://.godot/imported/watches.png-dfb755906f7ec829e7eff3eeb1c72d24.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://cursor/textures/circle_monochrome.png"
-dest_files=["res://.godot/imported/circle_monochrome.png-1fa5ff8d8b9c643f99e59e506b2fad97.ctex"]
+source_file="res://player/cursor/textures/watches.png"
+dest_files=["res://.godot/imported/watches.png-dfb755906f7ec829e7eff3eeb1c72d24.ctex"]
 
 [params]
 
