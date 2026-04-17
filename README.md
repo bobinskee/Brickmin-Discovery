@@ -1,5 +1,6 @@
 # Brickmin Discovery
 A Godot game about commanding lil guys. Heavily inspired by Pikmin in case it wasn't obvious. Just dumped the project file here so people can check it out, give feedback, point out stuff that can be improved on, etc.
+This project is dual-licensed under GNU GPL v3 and Creative Commons.
 
 How to try it:
 1. Download Godot (I'm using 4.6)
