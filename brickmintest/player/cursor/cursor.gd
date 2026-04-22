@@ -33,7 +33,7 @@ var calldot_shape := SphereShape3D.new()
 var calldot_hitball := PhysicsShapeQueryParameters3D.new()
 
 #The current radius of the calldot shape.
-var curr_rad: float = 0.0
+var curr_rad: float = 0.01
 
 #How far to look under the pointer for if there's ground.
 var look_down: Vector3 = Vector3.DOWN * 50 
@@ -52,13 +52,21 @@ var physics_pos_pointer: Vector3 = Vector3.ZERO
 #Same as the variable above, but for the landvis
 var physics_pos_landvis: Vector3 = Vector3.ZERO
 
+var follow_state = preload("res://brickmin/brickmin_states/follow_state.gd").new()
+
+var ray = PhysicsRayQueryParameters3D.new()
+
 #endregion
+
+func _ready() -> void:
+	ray.collision_mask = 1
+	ray.exclude = [player_body.get_rid()]
 
 func _input(_event: InputEvent) -> void:
 	#Only for testing.
 	#Will be deleted when done testing.
 	if Input.is_action_pressed("pressed_1"):
-		BrickminManager._spawn_min(player, pointer.global_position, get_tree().current_scene)
+		BrickminManager._spawn_min(pointer.global_position, get_tree().current_scene)
 	
 func _physics_process(delta: float) -> void:
 	## Do 3 raycasts, then a bunch of if-statements, and
@@ -94,29 +102,31 @@ func _physics_process(delta: float) -> void:
 	#This is also used if the raycast doesn't hit anything.
 	var max_vector = from_camera + camera.project_ray_normal(curr_mouse_pos) * (max_range + cam_player_dist)
 	
+	ray.hit_from_inside = false
+	
 	#The fundamental raycast projected from the 2D mouse position to the 3D world.
 	#This isn't visualized, it's just the raw mouse to 3D world raycast.
 	#If this ray hits an object in the world, it makes the pointer move to
 	#where the collision occurred.
-	var ray_pointer = PhysicsRayQueryParameters3D.create(from_camera, max_vector, 1)
-	ray_pointer.exclude = [player_body.get_rid()]
-	var rayhit_pointer = space_state.intersect_ray(ray_pointer)
+	ray.from = from_camera
+	ray.to = max_vector
+	var rayhit_pointer = space_state.intersect_ray(ray)
 	
 	#Raycast for finding ground to place the landing visual. 
 	#Landing visual is basically to show the x-z position of the pointer(physics position).
-	var ray_landvis = PhysicsRayQueryParameters3D.create(physics_pos_pointer, physics_pos_pointer + look_down, 1)
-	ray_landvis.exclude = [player_body.get_rid()]
-	var rayhit_landvis = space_state.intersect_ray(ray_landvis)
+	ray.from = physics_pos_pointer
+	ray.to = physics_pos_pointer + look_down
+	var rayhit_landvis = space_state.intersect_ray(ray)
 	
 	#Direction of the player to the pointer(physics position).
 	var dir_playertopointer = (physics_pos_pointer - player_body.global_position).normalized()
-	var end_playerpointer = player_body.global_position + (dir_playertopointer * max_range)
+	
 	
 	#A raycast that goes from the player to the position of the pointer.
 	#If something is hit by this, the landing visual is moved to that spot.
-	var ray_playertopointer = PhysicsRayQueryParameters3D.create(player_body.global_position, end_playerpointer, 1)
-	ray_playertopointer.exclude = [player_body.get_rid()]
-	var rayhit_playertopointer = space_state.intersect_ray(ray_playertopointer)
+	ray.from = player_body.global_position
+	ray.to = player_body.global_position + (dir_playertopointer * max_range)
+	var rayhit_playertopointer = space_state.intersect_ray(ray)
 	
 	#A point that checks if the pointer is touching a wall.
 	var end_findwall = physics_pos_pointer + (dir_playertopointer * 1.5)
@@ -125,10 +135,10 @@ func _physics_process(delta: float) -> void:
 	#Raycast for finding if the pointer is at a wall. It checks the pointer
 	#position to in the direction of the pointer to the player, and looks for
 	#walls and such.
-	var ray_findwall = PhysicsRayQueryParameters3D.create(physics_pos_pointer, end_findwall, 1)
-	ray_findwall.exclude = [player_body.get_rid()]
-	ray_findwall.hit_from_inside = true #Needed for it to detect walls.
-	var rayhit_foundwall = space_state.intersect_ray(ray_findwall)
+	ray.from = physics_pos_pointer
+	ray.to = end_findwall
+	ray.hit_from_inside = true #Needed for it to detect walls.
+	var rayhit_foundwall = space_state.intersect_ray(ray)
 	
 	#endregion
 	
@@ -205,7 +215,6 @@ func _physics_process(delta: float) -> void:
 	
 	#If the player is calling...
 	if input_handler.player_calling:
-		
 		#Increase the current radius to the maximum radius size. Its
 		#growth speed is delta times the growth speed.
 		curr_rad = move_toward(curr_rad, max_rad, delta * grow_speed)
@@ -219,39 +228,42 @@ func _physics_process(delta: float) -> void:
 		#doesn't feel like dealing with deciphering binary layer
 		#masks lol.
 		calldot_hitball.shape = calldot_shape
-		calldot_hitball.transform.origin = physics_pos_pointer
+		calldot_hitball.transform.origin = pointer.global_position
 		calldot_hitball.collision_mask = General._set_mask(3)
 		
 		#Check if anything collided with the hitball.
-		var called = get_world_3d().direct_space_state.intersect_shape(calldot_hitball)
+		var called = get_world_3d().direct_space_state.intersect_shape(calldot_hitball, 100)
+		
+		if called:
 		
 		#For all the things that collided with the hitball...
-		for i in called:
-			
-			#Make a variable out of the current iteration.
-			var who_was_called = i["collider"]
-			
-			#If the current iteration is a Brickmin...
-			if who_was_called.is_in_group("brickmin"):
+			for i in called:
 				
-				#make the leader the player that called them,
-				who_was_called.leader = player 
+				#Make a variable out of the current iteration.
+				var who_was_called = i["collider"]
 				
-				#put them into the follow state,
-				who_was_called.state = load("res://brickmin/brickmin_states/follow_state.tres")
-				
-				#zero their t (as a safety measure)
-				#(This is for when they're in throw state or
-				#gap jump state),
-				who_was_called.t = 0.0
-				
-				#and make their being_called variable true.
-				who_was_called.being_called = true
+				#Check if the thing called is a Brickmin.
+				if who_was_called.is_in_group("brickmin"):
+					
+					#If the Brickmin has no leader yet,
+					if not who_was_called.leader and not who_was_called.state is AirborneState:
+					
+						#make the leader the player that called them,
+						who_was_called.leader = player 
+						
+						#put them into the follow state,
+						
+						who_was_called.state = follow_state
+						
+						who_was_called.t = 0.0
+					
+					#Also set the being_called variable to true.
+					who_was_called.being_called = true
 	
 	#Otherwise, player isn't calling.
 	else:
 		#Keep the current radius at 0.
-		curr_rad = 0.0
+		curr_rad = 0.01
 	
 	#endregion
 	
@@ -277,7 +289,7 @@ func _process(_delta: float) -> void:
 	pointer.global_position = physics_pos_pointer
 	land_vis.global_position = physics_pos_landvis
 	
-	#Set the calldot mesh scale to whatever the current radius is.
-	#Vector3.ONE is just to make a Vector3 with all floats equal to
-	#the current radius.
+	##Set the calldot mesh scale to whatever the current radius is.
+	##Vector3.ONE is just to make a Vector3 with all floats equal to
+	##the current radius.
 	calldot.scale = Vector3.ONE * curr_rad

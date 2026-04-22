@@ -91,7 +91,7 @@ func _process(_delta: float) -> void:
 		#direction being aimed at.
 		#Decreasing would make the points run backwards, from
 		#the pointer to the player.
-		t += 0.01 
+		t += 0.001 
 		
 		#Set the middle_y to either the start or end's y-position,
 		#depending on what's higher.
@@ -104,6 +104,11 @@ func _process(_delta: float) -> void:
 		#   position.
 		middle_y = (start.y + end.y + distance_y)/2
 	
+	elif input_handler.player_swarming:
+		t += 0.001
+		aim_offset = 0
+		rebound_offset = 0
+	
 	#Player is idle, not aiming, so...
 	else:
 		#Cancel both height offsets so the line from the player to
@@ -113,6 +118,9 @@ func _process(_delta: float) -> void:
 		
 		#Zero the time (not required but eh).
 		t = 0
+	
+	if input_handler.player_aiming or input_handler.player_swarming:
+		t += 0.01 
 	
 	#The final downthrow offset, which goes from the start to the 
 	#end (order matters, since this is only supposed to apply if

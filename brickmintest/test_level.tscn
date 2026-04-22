@@ -149,10 +149,19 @@ shape = SubResource("BoxShape3D_1c2mv")
 mesh = SubResource("BoxMesh_f7g2b")
 
 [node name="wall8" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1569361787]
-transform = Transform3D(17.919226, 0, 0, 0, 22.24214, 0, 0, 0, 21.370998, 20.58418, 4.6780195, 6.9111977)
+transform = Transform3D(17.919226, 0, 0, 0, 22.24214, 0, 0, 0, 21.370998, 20.58418, 3.301219, 6.9111977)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/wall8" unique_id=2066155859]
 shape = SubResource("BoxShape3D_1c2mv")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/wall8" unique_id=708987258]
+mesh = SubResource("BoxMesh_f7g2b")
+
+[node name="wall10" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1502803154]
+transform = Transform3D(17.235718, 6.084478, 0, -4.9019184, 21.393736, 0, 0, 0, 21.370998, -21.963951, -10.438202, 1.3842611)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/wall10" unique_id=1940439553]
+shape = SubResource("BoxShape3D_1c2mv")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/wall10" unique_id=990181209]
 mesh = SubResource("BoxMesh_f7g2b")

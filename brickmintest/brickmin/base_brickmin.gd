@@ -1,12 +1,19 @@
 extends CharacterBody3D
 
 var leader: Node3D = null
-var state: BrickminState = null
+var state = null
 var id: int = 0
+var disbanded: bool = false
+
+var set_leader = false
+
+var thrown: bool = false
+var gapjumped: bool = false
 
 var speed: float = 15.0
 var acceleration: float = 50.0
-var jump_power: float = 4.0
+var jump_power: float = 4
+var jump_height: float = 10
 var being_called: bool = false
 var last_pos: Vector3 = Vector3.ZERO
 var space_min: float = 1.0
@@ -31,11 +38,17 @@ var near_cliff: bool = false
 var walk_off: bool = true
 
 var reaction_time = 1 + randf_range(0, 0.3)
+var failsafe_jump: bool = false
+var can_extend: bool = true
 
 #stuff for gap jumping
 var comb_force: Vector3 = Vector3.ZERO
 var wanna_jump: bool = false
-var jump_timer = randf_range(0.0, 0.2)
+var jump_timer = randf_range(0, 0.2)
+
+var player_cursor: Vector3
+var swarming
+var leader_body
 
 #thrown state stuff
 var t: float = 0.0

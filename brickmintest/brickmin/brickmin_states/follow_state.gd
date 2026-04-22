@@ -4,25 +4,26 @@ class_name FollowState
 var start_distance: float = 10
 var stop_distance: float = 5
 var random_dir
+var adjust_speed: float = 5.0
 
-func _update_min(brickmin: CharacterBody3D, delta: float, dict_individual: Dictionary, _dict_all: Dictionary):
+func _update_min(brickmin: CharacterBody3D, delta: float, min_data: Dictionary):
+	
 	var y_velocity = brickmin.velocity.y 
-	var target_position
 	var cur_speed = brickmin.speed
 	var repel_force = Vector3.ZERO
-	var adjust_speed: float = 5.0
+	var repel_weight: float = 1.0
 	
 	if brickmin.leader:
-	
-		var player_cursor = brickmin.leader.get_node(^"Cursor").get_node(^"Pointer")
-		var swarming = brickmin.leader.get_node(^"InputHandler").player_swarming
-		var leader_body = brickmin.leader.get_node(^"Body&Camera").get_node(^"CharacterBody3D")
+		
+		var target_position = brickmin.leader.body.global_position
 		
 		if brickmin.velocity.is_finite():
 			
 			brickmin.pathing = false
 			
-			var repel_weight: float = 1.0
+			target_position = brickmin.leader.body.global_position 
+			
+			
 			"""
 			if dict_individual["follow_path"]:
 				brickmin.pathing = true
@@ -41,22 +42,26 @@ func _update_min(brickmin: CharacterBody3D, delta: float, dict_individual: Dicti
 				
 				brickmin.get_child(3).global_position = target_position"""
 			
-			if swarming:
-				target_position = player_cursor.global_position
+			if brickmin.leader.input.player_swarming:
+				target_position = brickmin.leader.cursor.global_position
 				start_distance = 10
 				stop_distance = 0
 			
+			#elif abs(brickmin.leader.body.velocity.x) > 0 or abs(brickmin.leader.body.velocity.z) > 0:
+			#	target_position = brickmin.global_position + brickmin.leader.body.velocity.normalized()
+			
 			else:
-				target_position = leader_body.global_position
 				start_distance = 8
 				stop_distance = 8
+			
+			#brickmin.get_child(2).global_position = target_position
 			
 			var xz_brickmin = Vector2(brickmin.global_position.x, brickmin.global_position.z)
 			var xz_target = Vector2(target_position.x, target_position.z)
 			var xz_direction = xz_brickmin.direction_to(xz_target)
+			var xz_dist = xz_brickmin.distance_to(xz_target) 
 			var direction = Vector3(xz_direction.x, 0.0, xz_direction.y)
 			var target_velocity = direction * cur_speed
-			var xz_dist = xz_brickmin.distance_to(xz_target) 
 			
 			if not brickmin.is_on_floor():
 				
@@ -65,17 +70,19 @@ func _update_min(brickmin: CharacterBody3D, delta: float, dict_individual: Dicti
 			
 			else:
 				if abs(brickmin.velocity.x) > 0 or abs(brickmin.velocity.z) > 0:
-					repel_weight = 4.0
+					repel_weight = 10.0
+				
+				brickmin.jump_timer -= 0.075
 			
 			if not brickmin.made_it:
 				
-				if not swarming:
+				if not brickmin.leader.input.player_swarming:
 					
-					if leader_body.velocity.length() > 0.0:
+					if brickmin.leader.body.velocity.length() > 0.0:
 						start_distance = 8
 						stop_distance = 6
 					
-					if abs(brickmin.global_position.distance_to(target_position)) >= (stop_distance) or abs(leader_body.velocity.length()) > 0.0:
+					if abs(brickmin.global_position.distance_to(target_position)) >= (stop_distance) or abs(brickmin.leader.body.velocity.length()) > 0.0:
 						brickmin.following = true 
 						
 					else:
@@ -84,7 +91,10 @@ func _update_min(brickmin: CharacterBody3D, delta: float, dict_individual: Dicti
 						brickmin.xz_rand = (randf_range(0, 5))
 					
 				else:
-					if xz_dist >= (stop_distance) or abs(leader_body.velocity.length()) > 0.0:
+					
+					#repel_weight = 3.0
+					
+					if xz_dist >= (stop_distance) or abs(brickmin.leader.body.velocity.length()) > 0.0:
 						brickmin.following = true 
 						
 					else:
@@ -99,13 +109,40 @@ func _update_min(brickmin: CharacterBody3D, delta: float, dict_individual: Dicti
 			
 			var cur_accel: float = brickmin.acceleration
 			
+			#region Separation forces.
+			
+			var repel_distance: float = 0.0
+			
+			for i in (BrickminManager.total_min):
+				if i == brickmin: continue
+				
+				repel_distance = brickmin.global_position.distance_to(i.global_position)
+				
+				if repel_distance < brickmin.space_min:
+					#If the distance between the current thing being checked and the Brickmin is less...
+					#than the space distance...
+					repel_force += ((brickmin.global_position - i.global_position).normalized()/repel_distance) * (adjust_speed * 1)
+					#Add to the repel force.
+			
+			for i in (BrickminManager.leader_bodies):
+				repel_distance = brickmin.global_position.distance_to(i.global_position + (Vector3.ZERO * 1.5))
+				
+				if repel_distance < brickmin.space_leader:
+					repel_force += ((brickmin.global_position - i.global_position).normalized()/repel_distance) * (adjust_speed * 2)
+			
+			#endregion
+			
+			#brickmin.get_child(2).global_position = target_position
+			
+			#region Speed controls
+			
 			if brickmin.following:
 				
-				if not swarming:
+				if not brickmin.leader.input.player_swarming:
 					
 					var slide_it: bool = false
 					
-					if (abs(xz_dist - brickmin.xz_rand) <= brickmin.fallback) and abs(leader_body.velocity.length()) > 0.0:
+					if (abs(xz_dist - brickmin.xz_rand) <= brickmin.fallback) and abs(brickmin.leader.body.velocity.length()) > 0.0:
 						cur_speed = move_toward(cur_speed, 1.0, delta * (brickmin.acceleration * 3))
 						slide_it = true
 					
@@ -118,93 +155,81 @@ func _update_min(brickmin: CharacterBody3D, delta: float, dict_individual: Dicti
 			elif not brickmin.following:
 				target_velocity = Vector3.ZERO
 			
-			for current in (BrickminManager.total_min):
-				if current == brickmin: continue
-				
-				var distance = brickmin.global_position.distance_to(current.global_position)
-				
-				if distance < brickmin.space_min:
-					#If the distance between the current thing being checked and the Brickmin is less...
-					#than the space distance...
-					
-					repel_force += ((brickmin.global_position - current.global_position).normalized()/distance) * adjust_speed
-					#Add to the repel force.
-			
-			for leader in (BrickminManager.leader_bodies):
-				var distance = brickmin.global_position.distance_to(leader_body.global_position + (Vector3.ZERO * 1.5))
-				
-				if distance < brickmin.space_leader:
-					repel_force += ((brickmin.global_position - leader_body.global_position).normalized()/distance) * (adjust_speed * 2)
+			#endregion
 			
 			var final_force = ((repel_force * repel_weight) + target_velocity)
 			
 			var cur_move = brickmin.velocity.move_toward(final_force.limit_length(cur_speed), delta * cur_accel)
-			var combined_norm = Vector3.ZERO
 			
 			brickmin.comb_force = cur_move
 			
-			if dict_individual["near_cliff"]:
+			#region Stop Brickmin from walking off of ledges.
+			
+			if min_data["near_cliff"]:
 				
+				var combined_norm = Vector3.ZERO
 				var new_norms = []
 				
 				for i in range(2):
-					var cur_norm = dict_individual["normals"][i]
+					var cur_norm = min_data["normals"][i]
 					
 					if cur_norm != Vector3.ZERO and not cur_norm in new_norms:
 						new_norms.append(cur_norm)
 						combined_norm += cur_norm
-					
-					if new_norms.size() == 1:
-						combined_norm = combined_norm.normalized()
-						cur_move = cur_move.slide(combined_norm)
-						
-					elif new_norms.size() > 1:
-						cur_move = Vector3.ZERO
 				
-				if leader_body.is_on_floor():
+				if cur_move and combined_norm:
+					combined_norm = combined_norm.normalized()
+					
+					if combined_norm.dot(cur_move) > 0:
+						cur_move = cur_move.slide(combined_norm)
+				
+				if brickmin.leader.body.jump_to:
 					brickmin.wanna_jump = true
 					
-					if dict_individual["jump_to"]: 
-						if (dict_individual["jump_to"] - brickmin.global_position).dot(leader_body.global_position - brickmin.global_position) > 0.5:
+					if min_data["jump_to"]: 
+						
+						if (min_data["jump_to"].direction_to(brickmin.global_position)).dot(brickmin.leader.body.global_position.direction_to(brickmin.global_position)) > 0.5:
 							
-							var offset_amt = 1.5
-							
-							if not dict_individual["walk_off"]:
+							if not min_data["walk_off"]:
 								
-								var rand_offset = Vector3(randf_range(-offset_amt, offset_amt), 0.0, randf_range(-offset_amt, offset_amt))
-								var base_jump_height = 10
-								
-								brickmin.t = 0.0
-								brickmin.start = brickmin.global_position
-								brickmin.end = dict_individual["jump_to"] + rand_offset
-								brickmin.mid = ((dict_individual["jump_to"] + rand_offset) + brickmin.global_position)/2
-								brickmin.mid.y = base_jump_height + (0.5 * (brickmin.global_position.y + dict_individual["jump_to"].y + (abs(dict_individual["jump_to"].y - brickmin.global_position.y))))
-								
-								brickmin.jump_timer -= 0.05
-								
-								if brickmin.jump_timer <= 0.0 or abs(brickmin.leader.global_position - brickmin.global_position).length() > 1:
-									brickmin.state = load("res://brickmin/brickmin_states/gapjump_state.tres")
-							
-							elif dict_individual["walk_off"]:
-								cur_move = brickmin.velocity.move_toward(final_force.limit_length(cur_speed), delta * cur_accel)
+								if brickmin.jump_timer <= 0 and abs(brickmin.leader.body.global_position.distance_to(brickmin.global_position)) > 1:
+									
+									#var rand_offset = randf_range(0, offset_amt)
+									var rand_offset = randf_range(2, 2.5)
+									
+									brickmin.t = 0.0
+									brickmin.start = brickmin.global_position
+									brickmin.end = brickmin.global_position + (brickmin.global_position.direction_to(min_data["jump_to"]) * (brickmin.global_position.distance_to(min_data["jump_to"]) + rand_offset))
+									brickmin.mid = ((min_data["jump_to"]) + brickmin.global_position)/2
+									brickmin.mid.y = brickmin.jump_height + General._get_highest(brickmin.global_position.y, min_data["jump_to"].y, false)
+									brickmin.state = General.airborne_state
+									brickmin.gapjumped = true
+									
+									brickmin.jump_timer = randf_range(0, 0.2)
+						
+						elif min_data["walk_off"]:
+							cur_move = brickmin.velocity.move_toward(final_force.limit_length(cur_speed), delta * cur_accel)
 				else:
-					if abs(brickmin.global_position.distance_to(leader_body.global_position)) < 5:
+					if abs(brickmin.global_position.distance_to(brickmin.leader.body.global_position)) < 1:
 						cur_move = Vector3.ZERO
 				
 			else:
 				brickmin.wanna_jump = false
 			
+			#endregion
+			
 			brickmin.velocity = cur_move
+			
 			brickmin.velocity.y = y_velocity - (delta * General.gravity)
 			
 			if brickmin.is_on_floor():
 				
-				if dict_individual["hop_to"] and not dict_individual["near_cliff"]:
+				if min_data["hop_up"] and not min_data["near_cliff"]:
 					brickmin.velocity.y += brickmin.jump_power * General.jump_power_mult
-			
+				
 			brickmin.last_pos = brickmin.global_position
 			
 			brickmin.move_and_slide()
 	
 	else:
-		brickmin.state = load("res://brickmin/brickmin_states/idle_state.tres")
+		brickmin.state = General.idle_state

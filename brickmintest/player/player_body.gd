@@ -20,19 +20,28 @@ var can_bufferjump: bool = false #Able to jump.
 
 var has_jumped: bool = false #Whether the player jumped or not.
 
-var swarming: bool = false #Player is holding E to swarm.
-
 var jump_to: Vector3 = Vector3.ZERO #New position for Brickmin to jump to found.
 var should_jump: bool = false #The Brickmin want to actually jump to the jump position found.
 var shrink_offset: bool = false #Whether the amount of randomization in the Brickmin landing position is shrunk or not (makes where Brickmin jump more precise).
+var too_close: bool = false
+
+var bottom: float = 0
 
 var player_direction: Vector3 = Vector3(0.0, 0.0, 0.0) #Player's current direction.
+
+var ray = PhysicsRayQueryParameters3D.new()
 #endregion
 
 func _ready() -> void:
 	##Initialize jump_buffer.
 	
 	jump_buffer = jump_buffer_timing #Set the jump buffer to the jump buffer's timing.
+	
+	#Gets the bottom of the player model (with a 0.1 extension).
+	bottom = self.get_child(1).mesh.height + 0.5
+	
+	ray.collision_mask = 1
+	ray.exclude = [self.get_rid()]
 	
 func _physics_process(delta: float) -> void:
 	## Makes player move based on camera position, 
@@ -67,8 +76,7 @@ func _physics_process(delta: float) -> void:
 	#3: For the axis, it is multiplied by either 0 (no input), 1 (in that direction), or -1 (opposite or that direction).
 	#4: right * 1 (D press) = moving right, forward * -1 (S press) = moving backwards
 	#if input_handler.input_direction:
-	var input_2D = input_handler.input_direction
-	player_direction = (right * input_2D.x) + (forward * input_2D.y)
+	player_direction = (right * input_handler.input_direction.x) + (forward * input_handler.input_direction.y)
 	
 	player_direction.y = 0.0 #Remove the y-axis from the direction.
 	player_direction = player_direction.normalized() #Normalize the final direction.
@@ -142,20 +150,13 @@ func _physics_process(delta: float) -> void:
 	## these days I'll figure out how to do that, but as of now, this works fine.
 	## So long as Brickmin don't accidentally jump off ledges, it works.
 	
-	#The position the Brickmin will jump to when gap jumping. By default, this is the players...
-	#global position.
-	jump_to = self.global_position 
-	
 	#The direction to move the jump_to position if the player is near a ledge, ensuring
 	#that Brickmin won't accidentally fall off a ledge when jumping to the player.
 	var safe_direction: Vector3 = Vector3.ZERO
 	
 	var ledge_norm: Vector3 = Vector3.ZERO #Variable that stores checked ledge normals.
 	
-	#Gets the bottom of the player model (with a 0.1 extension).
-	var bottom: Vector3 = Vector3(0.0, ((self.get_child(1).mesh.height) + 0.1), 0.0)
-	
-	var end: Vector3 = self.global_position - bottom #Position for where the raycast will end.
+	ray.to = self.global_position - (Vector3.UP * bottom) #Position for where the raycast will end.
 	
 	for i in range(0, 360, 30): #Iterates from 0 to 360 degrees by 30 (12 angles for simplicity).
 		var curr_angle = deg_to_rad(i) #Convert the current angle to radians.
@@ -169,11 +170,11 @@ func _physics_process(delta: float) -> void:
 		#the current direction. For each direction, it's just arrow that starts just under...
 		#the player but in the direction of the current direction, pointing towards the...
 		#bottom-middle of the player (idk how good I'm explaining ts lol).
-		var start = self.global_position + (curr_direction.normalized() * 3) - bottom
+		ray.from = self.global_position + (curr_direction.normalized() * 5) - (Vector3.UP * bottom)
 		
-		var nearledge = PhysicsRayQueryParameters3D.create(start, end, 1) #Actual raycast.
-		nearledge.exclude = [self.get_rid()] #Exclude player, only check the world.
-		var nearledge_result = space_state.intersect_ray(nearledge) #Anything hit?
+		#var nearledge = PhysicsRayQueryParameters3D.create(start, end, 1) #Actual raycast.
+		#nearledge.exclude = [self.get_rid()] #Exclude player, only check the world.
+		var nearledge_result = space_state.intersect_ray(ray) #Anything hit?
 		
 		if nearledge_result: #Found a ledge.
 			if nearledge_result["normal"].y < 0.5: #If ledge normal's y is steeper than 0.5...
@@ -193,14 +194,26 @@ func _physics_process(delta: float) -> void:
 			
 			#Flattening y-axis just to be safe because we really have no need for it.
 			safe_direction.y = 0 
+			
 	
 	#Lower the jump_to to the bottom of the player, and include the safe direction vector.
 	#Bottom is required because jump_to is used as a raycast end position in the Brickmin
 	#manager, and the end position needs to be touching ground in order for the Brickmin
 	#to do a jump.
-	jump_to = jump_to - bottom + (safe_direction.normalized() * 5)
+	if self.is_on_floor():
+		ray.from = self.global_position
+		ray.to = self.global_position - (Vector3.UP * bottom)
+		
+		if space_state.intersect_ray(ray):
+			jump_to = self.global_position - (Vector3.UP * bottom) + (safe_direction.normalized() * 7)
+	
+	if abs(safe_direction) > Vector3.ZERO:
+		too_close = true
+	else:
+		too_close = false
+	
 	#endregion
 	
-	#testmesh.global_position = jump_to #Debug thing for visualizing jump_to.
+	testmesh.global_position = jump_to #Debug thing for visualizing jump_to.
 	
 	move_and_slide() #Need this at end to actually move.

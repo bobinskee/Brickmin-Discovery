@@ -10,19 +10,15 @@ extends Node
 #region Variables
 
 #Obvious stuff.
-@onready var player_body = self.get_parent().get_node(^"Body&Camera").get_node(^"CharacterBody3D").global_position
+@onready var player_body = %CharacterBody3D
 @onready var input_handler = $"../InputHandler" 
+@onready var cursor_line = $"../Cursor/CursorLine"
 
 var all_min: Array = BrickminManager.total_min #Every Brickmin on the field.
 
 #The squad array. Is automatically filled with whatever Brickmin have a leader
 #with a name that matches the player's.
 var squad: Array = []
-
-#Where the start, middle, and end variables are gotten for entering throw state.
-var cursor_line:Node3D
-
-var delta_global: float = 0.0
 
 #endregion
 
@@ -51,8 +47,8 @@ func _disband() -> void:
 				
 				#If the current Brickmin isn't mid-gap jump, then set 
 				#their state to idle.
-				if not squad[i].state is GapJumpState:
-					squad[i].state = load("res://brickmin/brickmin_states/idle_state.tres")
+				if not squad[i].state is AirborneState and squad[i].is_on_floor():
+					squad[i].state = General.idle_state
 				
 				#Remove the Brickmin's leader.
 				squad[i].leader = null
@@ -67,10 +63,6 @@ func _disband() -> void:
 func _throw() -> void:
 	##Throw a Brickmin.
 	
-	#Get the cursor line node, which has the start, middle, and end
-	#variables we need to make our throw bezier curve.
-	cursor_line = self.get_parent().get_node(^"Cursor").get_node(^"CursorLine")
-	
 	#If you have Brickmin in your squad...
 	if squad.size() > 0: 
 		var current = squad[squad.size() - 1] #get the last one in the squad,
@@ -78,11 +70,12 @@ func _throw() -> void:
 		squad.remove_at(squad.size() - 1) #remove them from the squad,
 		
 		#set their state to the throw state,
-		current.state = load("res://brickmin/brickmin_states/throw_state.tres")
+		current.state = General.airborne_state
 		current.t = 0.0 #reset their bezier curve time,
-		current.start = cursor_line.start #assign their start,
+		current.start = player_body.global_position #assign their start,
 		current.mid = cursor_line.middle #middle,
 		current.end = cursor_line.end #and end.
+		current.thrown = true
 
 #func _check_all_min() -> void:
 func _process(_delta: float) -> void:
