@@ -5,6 +5,8 @@ extends Node3D
 @onready var map_RID = get_world_3d().get_navigation_map()
 @onready var leaders = get_tree().get_nodes_in_group("leaders")
 
+var max_min: float = 200
+
 var total_min = []
 var leader_bodies = []
 
@@ -21,6 +23,9 @@ var group_amt: int = 2
 var ray = PhysicsRayQueryParameters3D.new()
 
 var min_ref = preload("res://brickmin/base_brickmin.tscn")
+
+var min_idle = []
+var min_following = []
 
 #endregion
 
@@ -47,7 +52,7 @@ func _spawn_min(spawn_pos: Vector3, scene: Node):
 				leader_bodies.append(i.body)
 	
 	#If the count is less than or equal to 100...
-	if spawn_count <= 100:
+	if spawn_count <= max_min:
 		
 		#and the reference for the base Brickmin exists...
 		if min_ref:
@@ -60,14 +65,23 @@ func _spawn_min(spawn_pos: Vector3, scene: Node):
 			new_min.global_position = spawn_pos #Set its spawn position.
 			new_min.name = ("min " + str(spawn_count)) #Give it a name.
 			new_min.id = total_min.size() #Give it a unique number ID.
-			new_min.state = General.idle_state #Set its state to idle.
+			#new_min.state = General.idle_state #Set its state to idle.
 	
 	#Make sure the count never exceeds 100.
-	spawn_count = clamp(spawn_count, 0, 100)
+	spawn_count = clamp(spawn_count, 0, max_min)
+
+var last_frame = -1
 
 func _physics_process(delta: float) -> void:
 	## Used to update all Brickmin in an efficient manner by iterating
 	## through all the Brickmin present.
+	"""
+	var cur_frame = Engine.get_frames_drawn()
+	
+	if cur_frame == last_frame:
+		return
+	
+	last_frame = cur_frame"""
 	
 	#Get all the Brickmin in the current tree.
 	var all_min = get_tree().get_nodes_in_group("brickmin")
@@ -79,8 +93,8 @@ func _physics_process(delta: float) -> void:
 	for i in all_min:
 		
 		#If it doesn't have a state, set it to the idle state.
-		if not i.state:
-			i.state = General.idle_state
+		#if not i.state:
+		#	i.state = General.idle_state
 		
 		#region Variables
 		
@@ -110,7 +124,7 @@ func _physics_process(delta: float) -> void:
 		
 		#region Stuff for the Brickmin in follow state.
 		
-		if i.state is FollowState or i.state is IdleState:
+		if i.state == "follow" or i.state == "idle":
 			
 			#Make sure the velocity length (speed) never exceeds the set Brickmin 
 			#speed.
@@ -406,7 +420,7 @@ func _physics_process(delta: float) -> void:
 							ray.to = recheck_pos - (Vector3.UP)
 							
 							if space_state.intersect_ray(ray):
-								i.get_child(2).global_position = recheck_pos
+								#i.get_child(2).global_position = recheck_pos
 								jump_to = recheck_pos
 							
 					
@@ -429,4 +443,15 @@ func _physics_process(delta: float) -> void:
 		}
 		
 		if i.state:
-			i.state._update_min(i, delta, min_data)
+			#i.state._update(i, delta, min_data)
+			match i.state:
+				"idle":
+					General.idle_state._update(i, delta, min_data)
+					
+				"follow":
+					General.follow_state._update(i, delta, min_data)
+				
+				"airborne":
+					General.airborne_state._update(i, delta, min_data)
+			
+			#i.move_and_slide()

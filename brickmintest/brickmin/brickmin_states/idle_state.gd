@@ -4,40 +4,54 @@ class_name IdleState
 var last_pos 
 var adjust_speed: float = 10.0
 
-func _update_min(brickmin: CharacterBody3D, delta: float, min_data: Dictionary):
+func _update(bmin: CharacterBody3D, delta: float, min_data: Dictionary):
 	
-	var rand = Vector3(randf_range(-360.0, 360.0), 0, randf_range(-360.0, 360.0))
-	var distance: float = 0
+	var rand = Vector3(randf_range(-45.0, 45.0), 0, randf_range(-45.0, 45.0))
+	#var distance: float = 0
 	var repel_force = Vector3.ZERO
-	var difference = Vector3.ZERO
-	
+	#var difference = Vector3.ZERO
+	"""
 	for current in (BrickminManager.total_min):
-		if current == brickmin: continue
+		if current == bmin: continue
 		
-		difference = brickmin.global_position - current.global_position
-		distance = brickmin.global_position.distance_to(current.global_position)
+		difference = bmin.global_position - current.global_position
+		distance = bmin.global_position.distance_to(current.global_position)
 		
 		if distance < 0.5:
 			difference += rand
 			repel_force += (difference.normalized()/distance) * adjust_speed
 	
 	for leader in (BrickminManager.leader_bodies):
-		distance = brickmin.global_position.distance_to(leader.global_position + (Vector3.DOWN * 1.5))
-		difference = brickmin.global_position - leader.global_position
+		distance = bmin.global_position.distance_to(leader.global_position + (Vector3.DOWN * 1.5))
+		difference = bmin.global_position - leader.global_position
 		
-		if distance < brickmin.space_leader:
-			repel_force += (difference.normalized()/distance) * adjust_speed
+		if distance < bmin.space_leader:
+			repel_force += (difference.normalized()/distance) * adjust_speed"""
 	
+	var any_overlapping = bmin.get_node("RepelBubble").get_overlapping_bodies()
+		
+	if any_overlapping:
+		for i in any_overlapping:
+			if i == bmin:
+				continue
+			
+			var repel_distance = bmin.global_position.distance_to(i["position"])
+			
+			if repel_distance < bmin.space_min:
+				#If the distance between the current thing being checked and the Brickbmin is less...
+				#than the space distance...
+				repel_force += ((bmin.global_position - i["position"]).normalized() + rand/repel_distance).limit_length(7)
+		
 	if not repel_force.is_finite():
 		repel_force = Vector3(randf(), 0, randf()).normalized()
 	
-	var cur_move = brickmin.velocity.move_toward(repel_force, delta * brickmin.acceleration)
+	var cur_move = bmin.velocity.move_toward(repel_force, delta * bmin.acceleration)
 	
-	if not brickmin.velocity.is_finite():
-		brickmin.global_position = last_pos + Vector3(randf(), 0, randf()).normalized()
-		brickmin.velocity = Vector3.ZERO
+	if not bmin.velocity.is_finite():
+		bmin.global_position = last_pos + Vector3(randf(), 0, randf()).normalized()
+		bmin.velocity = Vector3.ZERO
 	
-	brickmin.comb_force = cur_move
+	bmin.comb_force = cur_move
 	
 	var combined_norm = Vector3.ZERO
 	
@@ -57,13 +71,13 @@ func _update_min(brickmin: CharacterBody3D, delta: float, min_data: Dictionary):
 			if combined_norm.dot(cur_move) > 0:
 				cur_move = cur_move.slide(combined_norm)
 	
-	brickmin.reaction_time = randf_range(1, 1.3)
+	bmin.reaction_time = randf_range(1, 1.3)
 	
-	var y_velocity = brickmin.velocity.y
+	var y_velocity = bmin.velocity.y
 	
-	if brickmin.velocity.is_finite():
+	if bmin.velocity.is_finite():
 		
-		brickmin.velocity = cur_move
-		brickmin.velocity.y = y_velocity - (delta * General.gravity)
+		bmin.velocity = cur_move
+		bmin.velocity.y = y_velocity - (delta * General.gravity)
 		
-		brickmin.move_and_slide()
+		bmin.move_and_slide()

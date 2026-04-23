@@ -12,6 +12,8 @@ no_depth_test = true
 [sub_resource type="SphereMesh" id="SphereMesh_uk1wq"]
 material = SubResource("StandardMaterial3D_uk1wq")
 
+[sub_resource type="SphereShape3D" id="SphereShape3D_uk1wq"]
+
 [node name="CharacterBody3D" type="CharacterBody3D" unique_id=765707226 groups=["brickmin"]]
 physics_interpolation_mode = 1
 collision_layer = 4
@@ -28,8 +30,19 @@ skeleton = NodePath("../CollisionShape3D")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="." unique_id=1151145702]
 top_level = true
+visible = false
 mesh = SubResource("SphereMesh_uk1wq")
 
 [node name="MeshInstance3D3" type="MeshInstance3D" parent="." unique_id=1342179466]
 visible = false
 mesh = SubResource("SphereMesh_uk1wq")
+
+[node name="RepelBubble" type="Area3D" parent="." unique_id=51573816]
+visible = false
+collision_layer = 0
+collision_mask = 6
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RepelBubble" unique_id=782689925]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 0, 0, 0)
+visible = false
+shape = SubResource("SphereShape3D_uk1wq")

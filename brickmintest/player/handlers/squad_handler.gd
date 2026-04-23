@@ -47,8 +47,8 @@ func _disband() -> void:
 				
 				#If the current Brickmin isn't mid-gap jump, then set 
 				#their state to idle.
-				if not squad[i].state is AirborneState and squad[i].is_on_floor():
-					squad[i].state = General.idle_state
+				if not squad[i].state == "airborne" and squad[i].is_on_floor():
+					squad[i].state = "idle"
 				
 				#Remove the Brickmin's leader.
 				squad[i].leader = null
@@ -70,8 +70,10 @@ func _throw() -> void:
 		squad.remove_at(squad.size() - 1) #remove them from the squad,
 		
 		#set their state to the throw state,
-		current.state = General.airborne_state
+		current.state = "airborne"
 		current.t = 0.0 #reset their bezier curve time,
+		current.global_position = player_body.global_position
+		current.velocity = Vector3.ZERO
 		current.start = player_body.global_position #assign their start,
 		current.mid = cursor_line.middle #middle,
 		current.end = cursor_line.end #and end.

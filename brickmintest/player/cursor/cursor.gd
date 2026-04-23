@@ -253,7 +253,8 @@ func _physics_process(delta: float) -> void:
 						
 						#put them into the follow state,
 						
-						who_was_called.state = follow_state
+						who_was_called.state = "follow"
+						#who_was_called.state2 = "follow"
 						
 						who_was_called.t = 0.0
 					
