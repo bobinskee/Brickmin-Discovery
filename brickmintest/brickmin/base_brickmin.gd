@@ -19,6 +19,9 @@ var last_pos: Vector3 = Vector3.ZERO
 var space_min: float = 1.0
 var space_leader: float = 1.85
 
+#follow state stuff
+var repel_force: Vector3 = Vector3.ZERO
+
 #follow state hopping variables
 var can_hop: bool = false
 var cur_pos: Vector3 = Vector3.ZERO

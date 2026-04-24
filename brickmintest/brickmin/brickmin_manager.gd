@@ -5,7 +5,7 @@ extends Node3D
 @onready var map_RID = get_world_3d().get_navigation_map()
 @onready var leaders = get_tree().get_nodes_in_group("leaders")
 
-var max_min: float = 200
+var max_min: float = 100
 
 var total_min = []
 var leader_bodies = []

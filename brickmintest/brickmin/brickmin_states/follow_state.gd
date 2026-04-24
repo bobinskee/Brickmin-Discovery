@@ -4,14 +4,16 @@ class_name FollowState
 var start_distance: float = 10
 var stop_distance: float = 5
 var random_dir
-var adjust_speed: float = 5.0
+var adjust_speed: float = 2
 
 func _update(bmin: CharacterBody3D, delta: float, bmin_data: Dictionary):
 	
 	var y_velocity = bmin.velocity.y 
 	var cur_speed = bmin.speed
-	var repel_force = Vector3.ZERO
 	var repel_weight: float = 1.0
+	var repel_force = Vector3.ZERO
+	var expansion = 20
+	var keep_slide: bool = true
 	
 	if bmin.leader:
 		
@@ -22,7 +24,6 @@ func _update(bmin: CharacterBody3D, delta: float, bmin_data: Dictionary):
 			bmin.pathing = false
 			
 			target_position = bmin.leader.body.global_position 
-			
 			
 			"""
 			if dict_individual["follow_path"]:
@@ -44,15 +45,17 @@ func _update(bmin: CharacterBody3D, delta: float, bmin_data: Dictionary):
 			
 			if bmin.leader.input.player_swarming:
 				target_position = bmin.leader.cursor.global_position
-				start_distance = 10
+				start_distance = 0
 				stop_distance = 0
-			
-			#elif abs(brickbmin.leader.body.velocity.x) > 0 or abs(brickbmin.leader.body.velocity.z) > 0:
-			#	target_position = brickbmin.global_position + brickbmin.leader.body.velocity.normalized()
-			
+				
+				var dist = bmin.global_position - target_position
+				dist.y = 0
+				
+				if dist.length() < 6:
+					keep_slide = false
+					expansion = 500
 			else:
-				start_distance = 8
-				stop_distance = 8
+				stop_distance = 5
 			
 			#brickbmin.get_child(2).global_position = target_position
 			
@@ -70,7 +73,7 @@ func _update(bmin: CharacterBody3D, delta: float, bmin_data: Dictionary):
 			
 			else:
 				if abs(bmin.velocity.x) > 0 or abs(bmin.velocity.z) > 0:
-					repel_weight = 10.0
+					repel_weight = 2
 				
 				bmin.jump_timer -= 0.075
 			
@@ -78,9 +81,11 @@ func _update(bmin: CharacterBody3D, delta: float, bmin_data: Dictionary):
 				
 				if not bmin.leader.input.player_swarming:
 					
-					if bmin.leader.body.velocity.length() > 0.0:
-						start_distance = 8
-						stop_distance = 6
+					if abs(bmin.leader.body.velocity.length()) > 0.0:
+						start_distance = 5
+					
+					else:
+						start_distance = 10
 					
 					if abs(bmin.global_position.distance_to(target_position)) >= (stop_distance) or abs(bmin.leader.body.velocity.length()) > 0.0:
 						bmin.following = true 
@@ -91,19 +96,21 @@ func _update(bmin: CharacterBody3D, delta: float, bmin_data: Dictionary):
 						bmin.xz_rand = (randf_range(0, 5))
 					
 				else:
+					bmin.following = true
 					
-					#repel_weight = 3.0
-					
+					"""
 					if xz_dist >= (stop_distance) or abs(bmin.leader.body.velocity.length()) > 0.0:
 						bmin.following = true 
 						
 					else:
 						bmin.following = false
-						bmin.made_it = true
+						bmin.made_it = true"""
 			
 			if bmin.made_it and not bmin.following:
 				
-				if abs(bmin.global_position.distance_to(target_position)) >= (start_distance):
+				#expansion = 10
+				
+				if abs(bmin.global_position - target_position).length() >= (start_distance):
 					bmin.following = true
 					bmin.made_it = false
 			
@@ -111,39 +118,18 @@ func _update(bmin: CharacterBody3D, delta: float, bmin_data: Dictionary):
 			
 			#region Separation forces.
 			
-			var repel_distance: float = 0.0
-			"""
-			for i in (BrickminManager.total_min):
-				if i == bmin: continue
-				
-				repel_distance = bmin.global_position.distance_to(i.global_position)
-				
-				if repel_distance < bmin.space_min:
-					#If the distance between the current thing being checked and the Brickbmin is less...
-					#than the space distance...
-					repel_force += ((bmin.global_position - i.global_position).normalized()/repel_distance) * (adjust_speed * 1)
-					#Add to the repel force.
-			
-			for i in (BrickminManager.leader_bodies):
-				repel_distance = bmin.global_position.distance_to(i.global_position + (Vector3.ZERO * 1.5))
-				
-				if repel_distance < bmin.space_leader:
-					repel_force += ((bmin.global_position - i.global_position).normalized()/repel_distance) * (adjust_speed * 2)
-			"""
-			
 			var any_overlapping = bmin.get_node("RepelBubble").get_overlapping_bodies()
+			
+			#var repel_distance = 0
 			
 			for i in any_overlapping:
 				if i == bmin:
 					continue
 				
-				repel_distance = bmin.global_position.distance_to(i["position"])
+				#repel_distance += bmin.global_position.distance_to(i["position"])
 				
-				if repel_distance < bmin.space_min:
-					#If the distance between the current thing being checked and the Brickbmin is less...
-					#than the space distance...
-					repel_force += ((bmin.global_position - i["position"]).normalized()/repel_distance) * (adjust_speed * 1)
-					#Add to the repel force.
+				repel_force += (bmin.global_position - i["position"]).normalized() * expansion
+			
 			#endregion
 			
 			#brickbmin.get_child(2).global_position = target_position
@@ -151,27 +137,27 @@ func _update(bmin: CharacterBody3D, delta: float, bmin_data: Dictionary):
 			#region Speed controls
 			
 			if bmin.following:
+				if abs(bmin.leader.body.velocity.length()) > 0 or keep_slide:
+					repel_force = (repel_force * 0.1) + repel_force.slide(direction.normalized())
+				#repel_force += direction.cross(Vector3.UP).normalized() * 5
 				
 				if not bmin.leader.input.player_swarming:
 					
-					var slide_it: bool = false
-					
+					#too close
+					#var slide_it: bool = false
 					if (abs(xz_dist - bmin.xz_rand) <= bmin.fallback) and abs(bmin.leader.body.velocity.length()) > 0.0:
 						cur_speed = move_toward(cur_speed, 1.0, delta * (bmin.acceleration * 3))
-						slide_it = true
+						#slide_it = true
 					
 					else:
 						cur_speed = move_toward(cur_speed, bmin.speed, delta * (bmin.acceleration * 3))
-					
-					if slide_it and direction:
-						repel_force.slide(direction)
 			
 			elif not bmin.following:
 				target_velocity = Vector3.ZERO
 			
 			#endregion
 			
-			var final_force = ((repel_force * repel_weight) + target_velocity)
+			var final_force = ((repel_force) + target_velocity)
 			
 			var cur_move = bmin.velocity.move_toward(final_force.limit_length(cur_speed), delta * cur_accel)
 			
