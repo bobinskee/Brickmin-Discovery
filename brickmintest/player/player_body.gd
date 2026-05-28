@@ -30,6 +30,9 @@ var bottom: float = 0
 var player_direction: Vector3 = Vector3(0.0, 0.0, 0.0) #Player's current direction.
 
 var ray = PhysicsRayQueryParameters3D.new()
+
+var move_time: float = 0
+
 #endregion
 
 func _ready() -> void:
@@ -215,5 +218,19 @@ func _physics_process(delta: float) -> void:
 	#endregion
 	
 	testmesh.global_position = jump_to #Debug thing for visualizing jump_to.
+	
+	#region Track for when the player begins to move.
+	
+	var xz_movement = Vector3(self.velocity.x, 0, self.velocity.z)
+	
+	if abs(xz_movement.length_squared()) <= 0.1 and move_time != 0:
+		move_time = 0
+	
+	elif abs(xz_movement.length_squared()) > 0:
+		move_time += 0.05
+	
+	move_time = clamp(move_time, 0, 1)
+	
+	#endregion
 	
 	move_and_slide() #Need this at end to actually move.

@@ -166,7 +166,7 @@ func _process(_delta: float) -> void:
 		#Use the bezier curve function in the General script, 
 		#using the new timing, start, middle, and end as arguments,
 		#to find where the current point should be placed.
-		var placement = General._bezcurve(new_timing, start, middle, end)
+		var placement = MathUtils.bezier_curve(new_timing, start, middle, end)
 		
 		#Set the current points position to the placement along the
 		#path.

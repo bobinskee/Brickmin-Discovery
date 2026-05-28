@@ -1,7 +1,7 @@
 extends CharacterBody3D
 
 var leader: Node3D = null
-var state: String = "idle"
+var state: int = BudUtils.state.IDLE
 var id: int = 0
 var disbanded: bool = false
 
@@ -18,9 +18,16 @@ var being_called: bool = false
 var last_pos: Vector3 = Vector3.ZERO
 var space_min: float = 1.0
 var space_leader: float = 1.85
+var cur_dist: float = 0
 
 #follow state stuff
 var repel_force: Vector3 = Vector3.ZERO
+
+var time: float = 0
+
+var personal_space: float = 1.25
+
+var desired_offset: Vector3 = Vector3.ZERO
 
 #follow state hopping variables
 var can_hop: bool = false
@@ -35,7 +42,7 @@ var awaiting_hop_position:bool = true
 var made_it: bool = false
 var following: bool = false
 var where_to_hop: Vector3 = Vector3.ZERO
-var fallback: float = 5.0
+var fallback: float = 5
 var xz_rand = (randf_range(0, 5))
 var near_cliff: bool = false
 var walk_off: bool = true
@@ -58,3 +65,7 @@ var t: float = 0.0
 var start: Vector3 = Vector3.ZERO
 var end: Vector3 = Vector3.ZERO
 var mid: Vector3 = Vector3.ZERO
+
+#swarming shi
+var spin_time: float = 0
+var resetted: bool = false

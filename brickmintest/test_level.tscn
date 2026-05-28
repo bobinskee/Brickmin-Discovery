@@ -38,7 +38,7 @@ agent_max_slope = 90.0
 
 [sub_resource type="BoxMesh" id="BoxMesh_f7g2b"]
 
-[node name="TestLevel" type="Node3D" unique_id=1517292954]
+[node name="lvl_test" type="Node3D" unique_id=1517292954 groups=["levels"]]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=123353819]
 environment = SubResource("Environment_gojnm")
@@ -65,15 +65,25 @@ mesh = SubResource("BoxMesh_sb12i")
 skeleton = NodePath("../CollisionShape3D")
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=518127075]
+visible = false
 navigation_mesh = SubResource("NavigationMesh_gojnm")
 
 [node name="baseplate" type="StaticBody3D" parent="NavigationRegion3D" unique_id=1576740972]
-transform = Transform3D(123.85989, 0, 0, 0, 1.1755741, 0, 0, 0, 156.43431, 0, -0.33831692, 0)
+transform = Transform3D(286.76212, 0, 0, 0, 1.1755741, 0, 0, 0, 156.43431, 0, -0.33831692, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/baseplate" unique_id=840512867]
 shape = SubResource("BoxShape3D_1c2mv")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/baseplate" unique_id=1894147164]
+mesh = SubResource("BoxMesh_f7g2b")
+
+[node name="baseplate2" type="StaticBody3D" parent="NavigationRegion3D" unique_id=486645544]
+transform = Transform3D(286.76212, 0, 0, 0, 1.1755741, 0, 0, 0, 156.43431, 0, -0.33831692, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/baseplate2" unique_id=1975810498]
+shape = SubResource("BoxShape3D_1c2mv")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/baseplate2" unique_id=960068706]
 mesh = SubResource("BoxMesh_f7g2b")
 
 [node name="wall" type="StaticBody3D" parent="NavigationRegion3D" unique_id=415024150]

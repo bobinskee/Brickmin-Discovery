@@ -20,6 +20,7 @@ extends Node3D
 @onready var input_handler = $"../InputHandler" #Get some inputs.
 @onready var testmesh = $"../MeshInstance3D"
 @onready var calldot = $Pointer/CallDot/CallDotMesh
+@onready var squad_handler = $"../SquadHandler"
 
 @export var max_range: float = 20.0 #How far the cursor can go.
 @export var max_rad:float = 7.5 #How big the calldot can get.
@@ -52,9 +53,11 @@ var physics_pos_pointer: Vector3 = Vector3.ZERO
 #Same as the variable above, but for the landvis
 var physics_pos_landvis: Vector3 = Vector3.ZERO
 
-var follow_state = preload("res://brickmin/brickmin_states/follow_state.gd").new()
+#var follow_state = preload("res://brickmin/brickmin_states/follow_state.gd").new()
 
 var ray = PhysicsRayQueryParameters3D.new()
+
+var spin_time = 0
 
 #endregion
 
@@ -66,13 +69,16 @@ func _input(_event: InputEvent) -> void:
 	#Only for testing.
 	#Will be deleted when done testing.
 	if Input.is_action_pressed("pressed_1"):
-		BrickminManager._spawn_min(pointer.global_position, get_tree().current_scene)
+		print("pressed 1")
+		#BudManager._spawn_buds(pointer.global_position, get_tree().current_scene)
 	
 func _physics_process(delta: float) -> void:
 	## Do 3 raycasts, then a bunch of if-statements, and
 	## stuff for calling Brickmin.
 	## No actual object positions are set here since the
 	## objects are all just visualizers.
+	## Physics positions are used as stand-ins for actual
+	## global positions.
 	
 	#Needed for raycasts.
 	var space_state = get_world_3d().direct_space_state
@@ -243,17 +249,17 @@ func _physics_process(delta: float) -> void:
 				var who_was_called = i["collider"]
 				
 				#Check if the thing called is a Brickmin.
-				if who_was_called.is_in_group("brickmin"):
+				if who_was_called.is_in_group("brickbuds"):
 					
 					#If the Brickmin has no leader yet,
-					if not who_was_called.leader and not who_was_called.state is AirborneState:
+					if not who_was_called.leader and not who_was_called.state == BudUtils.state.AIRBORNE:
 					
 						#make the leader the player that called them,
 						who_was_called.leader = player 
 						
 						#put them into the follow state,
 						
-						who_was_called.state = "follow"
+						who_was_called.state = BudUtils.state.FOLLOW
 						#who_was_called.state2 = "follow"
 						
 						who_was_called.t = 0.0

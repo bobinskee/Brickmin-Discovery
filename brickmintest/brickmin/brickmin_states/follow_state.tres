@@ -1,7 +1,0 @@
-[gd_resource type="Resource" script_class="FollowState" format=3 uid="uid://cumhd7cd5dhcn"]
-
-[ext_resource type="Script" uid="uid://c7826ge6nyiu7" path="res://brickmin/brickmin_states/follow_state.gd" id="1_75xok"]
-
-[resource]
-script = ExtResource("1_75xok")
-metadata/_custom_type_script = "uid://c7826ge6nyiu7"

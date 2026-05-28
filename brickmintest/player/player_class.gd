@@ -1,6 +1,10 @@
 class_name Player
 extends Node3D
 
-@onready var body = %CharacterBody3D
-@onready var cursor = %Pointer
-@onready var input = %InputHandler
+var player_ID: int = 0
+
+@onready var body: CharacterBody3D = %CharacterBody3D
+@onready var cursor: Node3D = %Pointer
+@onready var input: Node = %InputHandler
+
+var swarm_offsets: Array = []  

@@ -13,15 +13,16 @@ extends Node
 @onready var player_body = %CharacterBody3D
 @onready var input_handler = $"../InputHandler" 
 @onready var cursor_line = $"../Cursor/CursorLine"
+@onready var player = $".." #The player themself.
 
-var all_min: Array = BrickminManager.total_min #Every Brickmin on the field.
+var all_buds: Array = BudHandler.all_buds #Every Brickmin on the field.
 
 #The squad array. Is automatically filled with whatever Brickmin have a leader
 #with a name that matches the player's.
 var squad: Array = []
 
 #endregion
-
+"""
 func  _ready() -> void:
 	## Set up the custom signals connections.
 	
@@ -47,8 +48,8 @@ func _disband() -> void:
 				
 				#If the current Brickmin isn't mid-gap jump, then set 
 				#their state to idle.
-				if not squad[i].state == "airborne" and squad[i].is_on_floor():
-					squad[i].state = "idle"
+				if not squad[i].state == BudUtils.state.AIRBORNE and squad[i].is_on_floor():
+					squad[i].state = BudUtils.state.IDLE
 				
 				#Remove the Brickmin's leader.
 				squad[i].leader = null
@@ -70,7 +71,7 @@ func _throw() -> void:
 		squad.remove_at(squad.size() - 1) #remove them from the squad,
 		
 		#set their state to the throw state,
-		current.state = "airborne"
+		current.state = BudUtils.state.AIRBORNE
 		current.t = 0.0 #reset their bezier curve time,
 		current.global_position = player_body.global_position
 		current.velocity = Vector3.ZERO
@@ -84,7 +85,7 @@ func _process(_delta: float) -> void:
 	## Check all Brickmin present on the field.
 	
 	#For all the Brickmin...
-	for i in (all_min):
+	for i in (all_buds):
 		
 		#if the current Brickmin has a leader, but the player's 
 		#squad doesn't have them, then...
@@ -94,3 +95,4 @@ func _process(_delta: float) -> void:
 			#name, then...
 			if i.leader.name == $"..".name:
 				squad.append(i) #add the Brickmin to the squad.
+				player.swarm_offsets.append(Vector3.ZERO)"""
