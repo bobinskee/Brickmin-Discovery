@@ -180,7 +180,7 @@ func update(bud: CharacterBody3D, delta: float, bud_data: Dictionary) -> void:
 			#	repel_amt = 20
 			
 			#if (Engine.get_physics_frames() % 5) == (bud.id % 5):
-			repel_force = BudUtils.get_repel_vector(bud, 10) * 5
+			repel_force = Utils_Bud.get_repel_vector(bud, 10) * 5
 			
 			if not bud.is_on_floor():
 				if bud.velocity.y > 0:
@@ -224,7 +224,7 @@ func update(bud: CharacterBody3D, delta: float, bud_data: Dictionary) -> void:
 			
 			if bud_data["near_cliff"]:
 				
-				cur_move = BudUtils.cliff_slide(cur_move, bud_data["normals"])
+				cur_move = Utils_Bud.cliff_slide(cur_move, bud_data["normals"])
 				
 				if bud.leader.body.jump_to:
 					bud.wanna_jump = true
@@ -244,7 +244,7 @@ func update(bud: CharacterBody3D, delta: float, bud_data: Dictionary) -> void:
 									bud.end = bud.global_position + (bud.global_position.direction_to(bud_data["jump_to"]) * (bud.global_position.distance_to(bud_data["jump_to"]) + rand_offset))
 									bud.mid = ((bud_data["jump_to"]) + bud.global_position)/2
 									bud.mid.y = bud.jump_height + max(bud.global_position.y, bud_data["jump_to"].y)
-									bud.state = BudUtils.state.AIRBORNE
+									bud.state = Utils_Bud.state.AIRBORNE
 									bud.gapjumped = true
 									bud.jump_timer = randf_range(0, 0.2)
 						
@@ -261,19 +261,19 @@ func update(bud: CharacterBody3D, delta: float, bud_data: Dictionary) -> void:
 			
 			bud.velocity = cur_move
 			
-			bud.velocity.y = y_velocity - (delta * General.gravity)
+			bud.velocity.y = y_velocity - (delta * Constants.gravity)
 			
 			if bud.is_on_floor():
 				
 				if bud_data["hop_up"] and not bud_data["near_cliff"]:
-					bud.velocity.y += bud.jump_power * General.jump_power_mult
+					bud.velocity.y += bud.jump_power * Constants.jump_power_mult
 				
 			bud.last_pos = bud.global_position
 			
 			bud.move_and_slide()
 	
 	else:
-		bud.state = BudUtils.state.IDLE
+		bud.state = Utils_Bud.state.IDLE
 
 func generateOffset(divisions: int, max_dist: float) -> Vector3:
 	var circle = TAU / divisions

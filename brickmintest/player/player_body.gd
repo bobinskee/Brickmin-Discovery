@@ -98,7 +98,7 @@ func _physics_process(delta: float) -> void:
 	
 	#The player velocity.y is equal to the velocity.y of the previous frame...
 	#minus the delta times the set gravity.
-	self.velocity.y = y_velocity - (delta * General.gravity)
+	self.velocity.y = y_velocity - (delta * Constants.gravity)
 	#endregion
 	
 	#region Handling jumping and bufferjumping.
@@ -130,7 +130,7 @@ func _physics_process(delta: float) -> void:
 			self.velocity.y = 0 #Cancel out any negative y-velocity from the gravity.
 		
 		if is_on_floor() or can_bufferjump: #Jump if either conditions are met.
-			self.velocity.y += (jump_power * General.jump_power_mult) #Normal jump.
+			self.velocity.y += (jump_power * Constants.jump_power_mult) #Normal jump.
 	
 	input_handler.player_jump = false #Reset jumping to false 
 	#endregion 

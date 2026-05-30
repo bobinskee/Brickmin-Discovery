@@ -74,7 +74,7 @@ func _spawn_buds(spawn_pos: Vector3, scene: Node):
 			new_bud.global_position = spawn_pos #Set its spawn position.
 			new_bud.name = ("bud " + str(spawn_count)) #Give it a name.
 			new_bud.id = total_buds.size() #Give it a unique number ID.
-			new_bud.state = BudUtils.state.IDLE
+			new_bud.state = Utils_Bud.state.IDLE
 	
 	#Make sure the count never exceeds 100.
 	spawn_count = clamp(spawn_count, 0, max_buds)
@@ -96,7 +96,7 @@ func _physics_process(delta: float) -> void:
 	if total_buds:
 		
 		if Engine.get_frames_drawn() != prev_frame:
-			BudUtils.setup_spatial_grid(total_buds)
+			Utils_Bud.setup_spatial_grid(total_buds)
 			prev_frame = Engine.get_frames_drawn()
 		
 		for bud in total_buds:
@@ -134,7 +134,7 @@ func _physics_process(delta: float) -> void:
 			
 			#region Stuff for the Brickmin in follow state.
 			
-			if bud.state == BudUtils.state.IDLE or bud.state == BudUtils.state.FOLLOW:
+			if bud.state == Utils_Bud.state.IDLE or bud.state == Utils_Bud.state.FOLLOW:
 				
 				#Make sure the velocity length (speed) never exceeds the set Brickmin 
 				#speed.
@@ -370,7 +370,7 @@ func _physics_process(delta: float) -> void:
 						#The y-position is the y-position of where to jump to but
 						#down by the gap jump height again. This way, the start is 
 						#above the end, pointing down towards it.
-						end.y = General._get_highest((bud.leader.body.global_position.y - bud.leader.body.bottom), bud.leader.body.jump_to.y, true) - 2 
+						end.y = min((bud.leader.body.global_position.y - bud.leader.body.bottom), bud.leader.body.jump_to.y) - 2 
 						ray.to = end
 						
 						#bud.get_child(2).global_position = end
@@ -456,13 +456,13 @@ func _physics_process(delta: float) -> void:
 			if bud.state != null:
 				#bud.state._update(i, delta, min_data)
 				match bud.state:
-					BudUtils.state.IDLE:
-						BudUtils.idle_state.update(bud, delta, min_data)
+					Utils_Bud.state.IDLE:
+						Utils_Bud.idle_state.update(bud, delta, min_data)
 						
-					BudUtils.state.FOLLOW:
-						BudUtils.follow_state.update(bud, delta, min_data)
+					Utils_Bud.state.FOLLOW:
+						Utils_Bud.follow_state.update(bud, delta, min_data)
 					
-					BudUtils.state.AIRBORNE:
-						BudUtils.airborne_state.update(bud, delta, min_data)
+					Utils_Bud.state.AIRBORNE:
+						Utils_Bud.airborne_state.update(bud, delta, min_data)
 				
 				#bud.move_and_slide()

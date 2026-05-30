@@ -11,7 +11,7 @@ func update(bud: CharacterBody3D, delta: float, _bud_data: Dictionary)  -> void:
 	elif bud.gapjumped:
 		bud.t += delta * 1.3
 	
-	var cur_vel = MathUtils.bezier_curve(bud.t, bud.start, bud.mid, bud.end) - bud.global_position
+	var cur_vel = Utils_Math.bezier_curve(bud.t, bud.start, bud.mid, bud.end) - bud.global_position
 	
 	var last_pos = bud.global_position
 	
@@ -27,10 +27,10 @@ func update(bud: CharacterBody3D, delta: float, _bud_data: Dictionary)  -> void:
 		if bud.move_and_collide(cur_vel):
 			
 			if bud.thrown:
-				bud.state = BudUtils.state.IDLE
+				bud.state = Utils_Bud.state.IDLE
 			
 			elif bud.gapjumped:
-				bud.state = BudUtils.state.FOLLOW
+				bud.state = Utils_Bud.state.FOLLOW
 			
 			bud.thrown = false
 			bud.gapjumped = false
@@ -38,4 +38,4 @@ func update(bud: CharacterBody3D, delta: float, _bud_data: Dictionary)  -> void:
 	elif not bud.velocity.is_finite():
 		print("ruh roh")
 		bud.global_position = bud.last_pos
-		bud.state = BudUtils.state.IDLE
+		bud.state = Utils_Bud.state.IDLE

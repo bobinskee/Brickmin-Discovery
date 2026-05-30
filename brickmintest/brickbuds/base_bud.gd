@@ -1,7 +1,7 @@
 extends CharacterBody3D
 
 var leader: Node3D = null
-var state: int = BudUtils.state.IDLE
+var state: int = Utils_Bud.state.IDLE
 var id: int = 0
 var disbanded: bool = false
 

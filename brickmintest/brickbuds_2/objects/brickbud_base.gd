@@ -1,4 +1,7 @@
+extends Databody
 class_name Brickbud
+
+var a = 5
 
 #region General
 
@@ -9,26 +12,11 @@ var active: bool = false
 
 #endregion
 
-#region Body & Kinematics
-
-var transform: Transform3D = Transform3D()
-var velocity: Vector3 = Vector3.ZERO
-
-var body_RID: RID
-var shape_RID: RID
-
-const col_layer = 3
-const col_mask = 1 
-
-var mesh_num: int
-
-#endregion
-
 #region Type & State
 
 var bud_type: BudStats.type = BudStats.type.BASE
 
-var bud_state: BudUtils.state = BudUtils.state.IDLE
+var bud_state: Utils_Bud.state = Utils_Bud.state.IDLE
 
 #endregion
 
@@ -45,5 +33,3 @@ func remove_self() -> void:
 	
 	if shape_RID.is_valid():
 		PhysicsServer3D.free_rid(shape_RID)
-	
-	

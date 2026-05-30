@@ -1,7 +1,7 @@
-extends Node
+class_name Constants
 
-var gravity: float = 50.0
-var jump_power_mult: float = 5.0
+static var gravity: float = 50.0
+static var jump_power_mult: float = 5.0
 
 var throw_start
 var throw_control

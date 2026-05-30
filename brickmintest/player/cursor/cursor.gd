@@ -235,7 +235,7 @@ func _physics_process(delta: float) -> void:
 		#masks lol.
 		calldot_hitball.shape = calldot_shape
 		calldot_hitball.transform.origin = pointer.global_position
-		calldot_hitball.collision_mask = General._set_mask(3)
+		calldot_hitball.collision_mask = Utils_Math._bitshift_left(3)
 		
 		#Check if anything collided with the hitball.
 		var called = get_world_3d().direct_space_state.intersect_shape(calldot_hitball, 100)
@@ -252,14 +252,14 @@ func _physics_process(delta: float) -> void:
 				if who_was_called.is_in_group("brickbuds"):
 					
 					#If the Brickmin has no leader yet,
-					if not who_was_called.leader and not who_was_called.state == BudUtils.state.AIRBORNE:
+					if not who_was_called.leader and not who_was_called.state == Utils_Bud.state.AIRBORNE:
 					
 						#make the leader the player that called them,
 						who_was_called.leader = player 
 						
 						#put them into the follow state,
 						
-						who_was_called.state = BudUtils.state.FOLLOW
+						who_was_called.state = Utils_Bud.state.FOLLOW
 						#who_was_called.state2 = "follow"
 						
 						who_was_called.t = 0.0

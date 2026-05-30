@@ -6,7 +6,6 @@
 [ext_resource type="Script" uid="uid://dvf3whhcan7l" path="res://player/camera_angle.gd" id="3_sweqy"]
 [ext_resource type="Script" uid="uid://bvs5htry233u6" path="res://player/cursor/cursor_line.gd" id="5_sweqy"]
 [ext_resource type="Texture2D" uid="uid://c8osyow87bl63" path="res://player/cursor/textures/kot_cursor2.png" id="6_1jxqw"]
-[ext_resource type="Script" uid="uid://dyk16kt15ynqd" path="res://general.gd" id="6_2hs0m"]
 [ext_resource type="Script" uid="uid://c6ll1bnvw6rpr" path="res://player/handlers/input_handler.gd" id="8_dw050"]
 [ext_resource type="Script" uid="uid://bxvdv7unl4ylt" path="res://player/handlers/squad_handler.gd" id="9_b26j0"]
 
@@ -125,9 +124,6 @@ upper_fade = 7.661952e-05
 lower_fade = 2.3582428e-05
 distance_fade_length = 200.0
 cull_mask = 1048573
-
-[node name="General" type="Node" parent="." unique_id=648599880]
-script = ExtResource("6_2hs0m")
 
 [node name="InputHandler" type="Node" parent="." unique_id=701630332]
 unique_name_in_owner = true
