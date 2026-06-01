@@ -1,11 +1,6 @@
 extends RefCounted
 class_name Utils_Bud
 
-#region Game variables
-static var bud_limit = 10
-
-#endregion
-
 enum state {IDLE, FOLLOW, AIRBORNE}
 
 const state_scripts: Dictionary = {
@@ -16,6 +11,8 @@ static var idle_state: BudState = preload("res://brickbuds/bud_states/idle_state
 static var follow_state: BudState = preload("res://brickbuds/bud_states/follow_state.gd").new()
 static var airborne_state: BudState = preload("res://brickbuds/bud_states/airborne_state.gd").new()
 #static var follow_v2: BudnState = preload("res://brickbuds/bud_states/followstate_v2.gd").new() 
+
+static var model: RID
 
 static var spatial_grid: Dictionary = {}
 const grid_size: float = 1
@@ -93,6 +90,35 @@ static func cliff_slide(cur_move: Vector3, normals: Array) -> Vector3:
 	
 	return new_vector
 
+#region : Type setting
+
+static func _set_active_types(type_list: PackedInt32Array) -> void:
+	
+	for i in type_list:
+		
+		#Check if the current type being checked is considered active (greater than 0).
+		if type_list[i - 1] > 0:
+			
+			var type_name = General_Bud.types_list.find_key(i - 1)
+			
+			if General_Bud.all_types.has(type_name):
+				
+				if General_Bud.all_types[type_name]["active"] != true:
+					General_Bud.all_types[type_name]["active"] = true
+					#print(type_name + " has been activated.")
+
+static func _reset_active_types() -> void:
+	
+	for i in General_Bud.types_list.size():
+		
+		var type_name = General_Bud.types_list.find_key(i)
+		
+		if General_Bud.all_types[type_name]["active"] != false:
+			General_Bud.all_types[type_name]["active"] = false
+			#print(type_name + " has been reset.")
+
+#endregion : Type setting
+
 static func _new_bud(index: int, world_space: RID, spawn_pos: Vector3 = Vector3.ZERO) -> Brickbud:
 	
 	var new_bud = Brickbud.new()
@@ -121,51 +147,53 @@ static func _new_bud(index: int, world_space: RID, spawn_pos: Vector3 = Vector3.
 	
 	return new_bud
 
-static func _setup_buds(bud_data_loaded: bool, all_buds: Array, world_space: RID, scene: Node, spawn_pos: Vector3 = Vector3.ZERO) -> void:
+static func _setup_budmeshes(save_list: Array[MeshLoader], world: RID) -> void:
 	
-	if not bud_data_loaded:
+	for i in General_Bud.types_list.size():
 		
-		print("Bud data not yet loaded. Setting them up!")
+		var current_type = General_Bud.types_list.find_key(i)
+		
+		if not BudStats.stats.has(General_Bud.types_list[current_type]):
+			push_warning("There's no mesh in the dictionary corresponding to the type of: " + current_type + ".")
+			continue
+		
+		var new_mesh = MeshLoader.new()
+		new_mesh.name = current_type
+		new_mesh.loader_type = MeshLoader.type.BUD
+		
+		var mesh_in_dict = BudStats.stats[General_Bud.types_list[current_type]]["mesh"]
+		
+		var mesh_to_use = Utils_Models._get_mesh(load(mesh_in_dict))
+		
+		if mesh_to_use:
+			new_mesh._initialize_self(world, General_Bud.limit, mesh_to_use)
+		
+		save_list[i] = new_mesh
+
+static func _setup_bud_data(all_buds: Array, world_space: RID, spawn_pos: Vector3 = Vector3.ZERO) -> void:
+	
+	if not General_Bud.bud_data_loaded:
+		
+		#print("Bud data not yet loaded. Setting them up!")
 		
 		if all_buds.size() > 0:
 			all_buds.fill(null)
 			
-			for k in range(Utils_Bud.bud_limit):
+			for k in range(General_Bud.limit):
 				
 				spawn_pos = Vector3(k * -2, 10, 0)
 				
 				var bud: Brickbud = Utils_Bud._new_bud(k, world_space, spawn_pos)
 				all_buds[k] = bud
 			
-			print("All buds loaded.")
-			bud_data_loaded = true
+			#print("All buds loaded.")
+			General_Bud.bud_data_loaded = true
+"""
+static func _get_active_types(all_buds: Array[Brickbud]) -> void:
 	
-	if bud_data_loaded:
+
+static func _setup_meshloaders(type_list: Dictionary):
+	
+	for i in type_list.keys():
 		
-		print("Bud data has been loaded! Running mesh setup.")
-		
-		var mm_node: MultiMeshInstance3D = MultiMeshInstance3D.new()
-		
-		
-		for i in range(BudStats.type.size()):
-			
-			var bud_type: String = BudStats.type.keys()[i]
-			
-			mm.transform_format = MultiMesh.TRANSFORM_3D
-			mm.instance_count = Utils_Bud.bud_limit
-			
-			var mesh_to_load = load(BudStats.stats[i]["mesh"])
-			
-			if mesh_to_load:
-				mm.mesh = mesh_to_load
-			else:
-				print("No mesh found!")
-			
-			mm_node.name = bud_type + "_typeloader"
-			mm_node.multimesh = mm
-			
-			#for k in range(mm.instance_count):
-			
-			scene.add_child(mm_node)
-		
-		Utils_Models._data_mesh_sync(all_buds, mm, false)
+"""

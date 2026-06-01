@@ -1,11 +1,9 @@
 extends Resource
 class_name BudStats
 
-enum type { BASE }
-
 const stats = {
 	
-	type.BASE: {
+	General_Bud.types_list.BASE: {
 		
 		"name" : "base bud",
 		

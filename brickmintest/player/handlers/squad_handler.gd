@@ -6,7 +6,7 @@ extends Node
 ## a boolean lol.
 ## NOTE: Whistling is handled by cursor.gd. I feel like it made more
 ## sense to just keep it there.
-
+"""
 #region Variables
 
 #Obvious stuff.
@@ -15,14 +15,14 @@ extends Node
 @onready var cursor_line = $"../Cursor/CursorLine"
 @onready var player = $".." #The player themself.
 
-var all_buds: Array = BudHandler.all_buds #Every Brickmin on the field.
+var all_buds: Array[Brickbud] = BudHandler.all_buds #Every Brickmin on the field.
 
 #The squad array. Is automatically filled with whatever Brickmin have a leader
 #with a name that matches the player's.
 var squad: Array = []
 
 #endregion
-"""
+
 func  _ready() -> void:
 	## Set up the custom signals connections.
 	

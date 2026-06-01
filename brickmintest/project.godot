@@ -16,7 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="brickmintest"
 run/main_scene="uid://bnjh0ghr3dx36"
-config/features=PackedStringArray("4.6", "Forward Plus")
+config/features=PackedStringArray("4.6", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
@@ -24,9 +24,9 @@ config/icon="res://icon.svg"
 BudManager="res://brickbuds/bud_manager.gd"
 BudHandler="*uid://bcei80cvarv3y"
 
-[display]
+[dotnet]
 
-window/size/mode=2
+project/assembly_name="brickmintest"
 
 [global_group]
 

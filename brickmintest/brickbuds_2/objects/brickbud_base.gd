@@ -8,13 +8,13 @@ var a = 5
 var name: String = ""
 var bud_id: int = 0
 
-var active: bool = false
+var active: int = 1
 
 #endregion
 
 #region Type & State
 
-var bud_type: BudStats.type = BudStats.type.BASE
+var bud_type: General_Bud.types_list = General_Bud.types_list.BASE
 
 var bud_state: Utils_Bud.state = Utils_Bud.state.IDLE
 
