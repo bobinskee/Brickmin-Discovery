@@ -1,5 +1,5 @@
 extends Node3D
-
+"""
 #region Variables
 
 @onready var map_RID = get_world_3d().get_navigation_map()
@@ -74,7 +74,7 @@ func _spawn_buds(spawn_pos: Vector3, scene: Node):
 			new_bud.global_position = spawn_pos #Set its spawn position.
 			new_bud.name = ("bud " + str(spawn_count)) #Give it a name.
 			new_bud.id = total_buds.size() #Give it a unique number ID.
-			new_bud.state = Utils_Bud.state.IDLE
+			new_bud.state = General_Bud.states_list.IDLE
 	
 	#Make sure the count never exceeds 100.
 	spawn_count = clamp(spawn_count, 0, max_buds)
@@ -134,7 +134,7 @@ func _physics_process(delta: float) -> void:
 			
 			#region Stuff for the Brickmin in follow state.
 			
-			if bud.state == Utils_Bud.state.IDLE or bud.state == Utils_Bud.state.FOLLOW:
+			if bud.state == General_Bud.states_list.IDLE or bud.state == General_Bud.states_list.FOLLOW:
 				
 				#Make sure the velocity length (speed) never exceeds the set Brickmin 
 				#speed.
@@ -167,7 +167,7 @@ func _physics_process(delta: float) -> void:
 					targ_dir = bud.global_position.direction_to(target)
 					targ_dir.y = 0.0
 					
-					"""
+					
 					if abs(leader_body.global_position.y - target.y) < 1.1 and not swarming:
 						
 						var dir_to_targ = (target - bud.global_position)
@@ -209,7 +209,7 @@ func _physics_process(delta: float) -> void:
 								NavigationServer3D.query_path(pf_params, pf_result)
 								
 								path = pf_result.get_path()
-					"""
+					
 					#region Brickmin hopping.
 					
 					## This bit is what determines whether the Brickmin should hop up
@@ -452,17 +452,18 @@ func _physics_process(delta: float) -> void:
 				"follow_path": path,
 				"path_index": path_index,
 			}
-			
+			=
 			if bud.state != null:
 				#bud.state._update(i, delta, min_data)
 				match bud.state:
-					Utils_Bud.state.IDLE:
+					General_Bud.states_list.IDLE:
 						Utils_Bud.idle_state.update(bud, delta, min_data)
 						
-					Utils_Bud.state.FOLLOW:
+					General_Bud.states_list.FOLLOW:
 						Utils_Bud.follow_state.update(bud, delta, min_data)
 					
-					Utils_Bud.state.AIRBORNE:
+					General_Bud.states_list.AIRBORNE:
 						Utils_Bud.airborne_state.update(bud, delta, min_data)
 				
 				#bud.move_and_slide()
+"""

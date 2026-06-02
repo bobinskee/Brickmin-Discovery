@@ -1,5 +1,5 @@
 extends BudState
-
+"""
 ## For when Brickmin are following player
 ## Moving, separation, and jumping
 
@@ -40,7 +40,7 @@ func update(bud: CharacterBody3D, delta: float, bud_data: Dictionary) -> void:
 			
 			bud.pathing = false
 			
-			"""
+			
 			if dict_individual["follow_path"]:
 				brickbud.pathing = true
 				repel_weight = 0.01
@@ -56,7 +56,7 @@ func update(bud: CharacterBody3D, delta: float, bud_data: Dictionary) -> void:
 				
 				brickbud.next_pos = target_position
 				
-				brickbud.get_child(3).global_position = target_position"""
+				brickbud.get_child(3).global_position = target_position
 			
 			var cur_accel: float = bud.acceleration
 			
@@ -171,10 +171,10 @@ func update(bud: CharacterBody3D, delta: float, bud_data: Dictionary) -> void:
 			var target_velocity = Vector3(xz_direction.x, 0.0, xz_direction.y).normalized() * cur_speed
 			
 			#region Separation forces.
-			"""
+			
 			if abs(bud.leader.body.velocity.length_squared()) > 0 and not bud.leader.input.player_swarming:
 				if abs(bud.global_position.distance_squared_to(target_position)) >= pow(5, 2):
-					repel_amt = 30"""
+					repel_amt = 30
 			
 			#if abs(bud.global_position.x - bud.leader.body.global_position.x) <= 5 and abs(bud.global_position.z - bud.leader.body.global_position.z) <= 5: 
 			#	repel_amt = 20
@@ -198,14 +198,14 @@ func update(bud: CharacterBody3D, delta: float, bud_data: Dictionary) -> void:
 				#repel_weight = 0.5
 				if abs(cur_speed) > 0:
 					repel_force += repel_force.slide(target_velocity.normalized()).normalized() * repel_force.length()
-				"""
+				
 				if (abs(bud.leader.body.velocity.x) > bud.leader.body.speed - 1 or abs(bud.leader.body.velocity.z) > bud.leader.body.speed - 1 and not bud.leader.input.player_swarming) or keep_slide:
 					if bud.velocity.dot(target_velocity) > 0.5:
 						if abs(bud.global_position.distance_squared_to(target_position)) > pow(bud.fallback, 2):
 							repel_force = repel_force.slide(target_velocity.normalized())
 			
 			elif not bud.following:
-				target_velocity = Vector3.ZERO"""
+				target_velocity = Vector3.ZERO
 			
 			#endregion
 			
@@ -290,7 +290,7 @@ func generateOffset(divisions: int, max_dist: float) -> Vector3:
 	newpos.y = 0
 	return newpos
 
-"""
+
 ##Return a normalized vector pointing away from any too-close neighbors.
 func get_repel_vector(bud: CharacterBody3D, check_cap: float) -> Vector3:
 	
@@ -312,4 +312,5 @@ func get_repel_vector(bud: CharacterBody3D, check_cap: float) -> Vector3:
 		if neighbors_checked >= check_cap:
 			break
 		
-	return repel_force.normalized()"""
+	return repel_force.normalized()
+"""

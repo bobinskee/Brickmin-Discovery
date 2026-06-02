@@ -1,10 +1,10 @@
 class_name General_Bud
 
+static var limit: int = 3
+
 enum types_list { BASE, AQKO }
 
 static var all_buds: Array[Brickbud] = []
-
-static var limit: int = 3
 
 static var bud_data_loaded: bool = false
 static var types_logged: bool = false

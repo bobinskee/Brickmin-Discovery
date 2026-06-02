@@ -25,14 +25,6 @@ static func _data_mesh_sync(object_list: Array, multimesh: MultiMesh, extra_data
 		
 	multimesh.set_buffer(transform_final)
 	
-"""
-static func _make_meshloader(type: MeshLoader.type, instances: int, name: StringName, world_space: RID) -> MeshLoader:
-	var new_mesh = MeshLoader.new()
-	new_mesh.loader_type = type
-	new_mesh.name = name
-	
-	return new_mesh
-"""
 static func _get_mesh(resource: Resource) -> Mesh:
 	
 	if not resource:

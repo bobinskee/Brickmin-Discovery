@@ -1,11 +1,7 @@
 extends RefCounted
 class_name Utils_Bud
 
-enum state {IDLE, FOLLOW, AIRBORNE}
 
-const state_scripts: Dictionary = {
-	state.IDLE: preload("res://brickbuds_2/states/state_idling.gd")
-}
 
 static var idle_state: BudState = preload("res://brickbuds/bud_states/idle_state.gd").new()
 static var follow_state: BudState = preload("res://brickbuds/bud_states/follow_state.gd").new()
@@ -130,8 +126,9 @@ static func _new_bud(index: int, world_space: RID, spawn_pos: Vector3 = Vector3.
 		
 		new_bud.bud_id = index
 		new_bud.transform_g.origin = spawn_pos
+		new_bud.behavior = BehaviorLoader.IDLE
 		
-		PhysicsServer3D.shape_set_data(new_bud.shape_RID, BudStats.stats[new_bud.bud_type]["shape_scale"])
+		PhysicsServer3D.shape_set_data(new_bud.shape_RID, BudStats.stats[new_bud.type]["shape_scale"])
 		
 		PhysicsServer3D.body_set_space(new_bud.body_RID, world_space)
 		
@@ -188,12 +185,35 @@ static func _setup_bud_data(all_buds: Array, world_space: RID, spawn_pos: Vector
 			
 			#print("All buds loaded.")
 			General_Bud.bud_data_loaded = true
-"""
-static func _get_active_types(all_buds: Array[Brickbud]) -> void:
-	
 
-static func _setup_meshloaders(type_list: Dictionary):
+static func _sync_budmeshes(mesh_list: Array[MeshLoader], buffer: PackedFloat32Array, start_pos: int) -> void:
 	
-	for i in type_list.keys():
+	for meshloader in mesh_list:
+			
+		#This is pretty much guranteed to happen since the mesh list has been resized, so it
+		#checks for as certain number of entries based on how big the General_Bud.types_list
+		#is. If there's at least one type not present on the field, this will error, so we
+		#just gotta make it continue on.
+		if meshloader == null:
+			continue
 		
-"""
+		if not General_Bud.all_types.has(meshloader.name):
+			push_warning("This type doesn't have a corresponding dictionary.")
+			continue
+		
+		if meshloader.loader_type == MeshLoader.type.BUD:
+			if General_Bud.all_types[meshloader.name]["active"] == true:
+				
+				for bud in General_Bud.all_buds:
+					
+					if bud.active:
+						var bud_type = General_Bud.types_list.keys()[bud.type]
+						
+						if General_Bud.all_types[bud_type] == General_Bud.all_types[meshloader.name]:
+							
+							for g in range(12):
+								buffer[(start_pos * 12) + g] = Utils_Math._Transform3D_to_PackedFloat32(bud.transform_g)[g]
+							
+							start_pos += 1
+				
+				RenderingServer.multimesh_set_buffer(meshloader.multimesh_RID, buffer)

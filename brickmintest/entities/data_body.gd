@@ -15,3 +15,11 @@ const col_mask = 1
 var mesh_num: int
 
 #endregion
+
+func remove_self() -> void:
+	
+	if body_RID.is_valid():
+		PhysicsServer3D.free_rid(body_RID)
+	
+	if shape_RID.is_valid():
+		PhysicsServer3D.free_rid(shape_RID)

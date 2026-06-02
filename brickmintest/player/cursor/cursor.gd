@@ -241,31 +241,34 @@ func _physics_process(delta: float) -> void:
 		var called = get_world_3d().direct_space_state.intersect_shape(calldot_hitball, 100)
 		
 		if called:
-		
+			
 		#For all the things that collided with the hitball...
 			for i in called:
 				
 				#Make a variable out of the current iteration.
-				var who_was_called = i["collider"]
+				var thing = i["collider"]
+				
+				print(thing)
 				
 				#Check if the thing called is a Brickmin.
-				if who_was_called.is_in_group("brickbuds"):
-					
+				if thing is Brickbud:
+					print("yes")
 					#If the Brickmin has no leader yet,
-					if not who_was_called.leader and not who_was_called.state == Utils_Bud.state.AIRBORNE:
+					if not thing.leader_ID and thing.leader_ID != player.player_ID:# and not who_was_called.state == BehaviorLoader..AIRBORNE:
 					
 						#make the leader the player that called them,
-						who_was_called.leader = player 
+						thing.leader_ID = player.player_ID
+						print(thing.bud_id + " has joined.") 
 						
 						#put them into the follow state,
 						
-						who_was_called.state = Utils_Bud.state.FOLLOW
+						#who_was_called.state = General_Bud.states_list.FOLLOW
 						#who_was_called.state2 = "follow"
 						
-						who_was_called.t = 0.0
+						#who_was_called.t = 0.0
 					
 					#Also set the being_called variable to true.
-					who_was_called.being_called = true
+					#who_was_called.being_called = true
 	
 	#Otherwise, player isn't calling.
 	else:

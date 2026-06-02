@@ -1,5 +1,5 @@
 extends BudState
- 
+"""
 #var idle_state = preload("res://brickbud/brickbud_states/idle_state.gd").new()
 
 func update(bud: CharacterBody3D, delta: float, _bud_data: Dictionary)  -> void:
@@ -38,4 +38,4 @@ func update(bud: CharacterBody3D, delta: float, _bud_data: Dictionary)  -> void:
 	elif not bud.velocity.is_finite():
 		print("ruh roh")
 		bud.global_position = bud.last_pos
-		bud.state = Utils_Bud.state.IDLE
+		bud.state = Utils_Bud.state.IDLE"""
