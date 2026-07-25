@@ -16,4 +16,6 @@ Space - Jump,
 F - Call,
 LMB - Throw Min,
 E - Swarm (makes Min follow cursor),
-Q - Disband,
+Q - Disband
+
+fun while it lasted....
